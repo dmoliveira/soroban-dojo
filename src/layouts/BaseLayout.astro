@@ -9,7 +9,7 @@ interface Props {
 
 const { title, description = 'Soroban Dojo on GitHub Pages' } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const base = import.meta.env.BASE_URL;
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 ---
 
 <!doctype html>
