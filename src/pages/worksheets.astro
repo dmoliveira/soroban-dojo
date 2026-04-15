@@ -9,7 +9,8 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     <h1>Ledger-style drill sheets</h1>
     <p>Choose a fixed curriculum sheet or generate a denser practice ledger by level, operation family, and digit band. Blank responses are skipped; partial score uses only answered drills.</p>
 
-    <div class="worksheet-controls-grid ledger-controls">
+    <div class="ledger-controls worksheet-controls-shell">
+      <div class="worksheet-controls-grid worksheet-controls-grid-main">
       <label class="stack-sm">
         <span>Sheet mode</span>
         <select id="worksheet-mode" class="select">
@@ -87,6 +88,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
           <option value="on">On</option>
         </select>
       </label>
+      </div>
     </div>
 
     <div class="button-row">
@@ -253,6 +255,17 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         node.checked = defaults[level].includes(node.value);
       });
       byId('worksheet-band').value = levelBands[level] || '2';
+      if (['L2','L3','L5'].includes(level)) {
+        byId('worksheet-orientation').value = 'vertical';
+      } else {
+        byId('worksheet-orientation').value = 'ledger';
+      }
+    };
+
+    const autoAlignOrientation = () => {
+      const families = selectedFamilies();
+      const verticalPreferred = families.includes('sequence') || families.includes('anzan');
+      if (verticalPreferred) byId('worksheet-orientation').value = 'vertical';
     };
 
     const readWeakAreas = () => {
@@ -478,6 +491,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 
     byId('worksheet-level')?.addEventListener('change', () => {
       applyLevelDefaults();
+      renderSheet();
     });
     byId('generate-worksheet')?.addEventListener('click', renderSheet);
     byId('check-worksheet')?.addEventListener('click', () => scoreSheet(false));
@@ -486,6 +500,12 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       byId('worksheet-style').value = 'teacher';
       renderSheet();
       scoreSheet(true);
+    });
+    document.querySelectorAll('input[name="worksheet-family"]').forEach((node) => {
+      node.addEventListener('change', () => {
+        autoAlignOrientation();
+        renderSheet();
+      });
     });
     document.querySelectorAll('#worksheet-mode, #worksheet-level, #worksheet-family, #worksheet-band, #worksheet-style, #worksheet-orientation, #worksheet-count').forEach((node) => {
       node.addEventListener('change', renderSheet);
