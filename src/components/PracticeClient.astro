@@ -273,7 +273,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
   };
   const pick = (rng, items) => items[Math.floor(rng() * items.length)];
 
-  const buildGeneratedQuestion = (level, index, rng) => {
+  const buildGeneratedQuestion = (level, index, rng, questionStyle = 'mixed') => {
     if (level === 'L0') {
       const a = Math.floor(rng() * 4) + 1;
       const b = Math.floor(rng() * (5 - a)) + 1;
@@ -282,7 +282,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         id: `g-${level}-${index}`,
         progressKey: `generated-${simpleSlug(`${level}-${answer}`)}`,
         title: `Generated starter sum ${index + 1}`,
-        prompt: `Start from ${a}. Add ${b}. What is the final value?`,
+        prompt: questionStyle === 'visual' ? `On one rod, start from ${a}. Add ${b}. What final value do you read?` : `Start from ${a}. Add ${b}. What is the final value?`,
         answer,
         visualValue: answer,
         steps: [`Start at ${a}.`, `Add ${b}.`, `${a} + ${b} = ${answer}.`],
@@ -291,7 +291,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     if (level === 'L1') {
       const a = Math.floor(rng() * 8) + 1;
       const b = Math.floor(rng() * (9 - a)) + 1;
-      const subtract = rng() > 0.5;
+      const subtract = questionStyle === 'mental' ? false : rng() > 0.5;
       if (subtract) {
         const start = a + b;
         return {
@@ -314,13 +314,13 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         steps: [`Start at ${a}.`, `Add ${b}.`, `${a} + ${b} = ${a + b}.`],
       };
     }
-    const base = Math.floor(rng() * 8) + 1;
-    const answer = 10 - base;
-    return {
+      const base = Math.floor(rng() * 8) + 1;
+      const answer = 10 - base;
+      return {
       id: `g-${level}-${index}`,
       progressKey: `generated-${simpleSlug(`${level}-${base}-${answer}`)}`,
       title: `Generated complement ${index + 1}`,
-      prompt: `You are at ${base}. Which number completes the value to 10?`,
+        prompt: questionStyle === 'mental' ? `Without moving beads yet, what number completes ${base} to 10?` : `You are at ${base}. Which number completes the value to 10?`,
       answer,
       visualValue: 10,
       steps: [`Start at ${base}.`, `Ask what ${base} needs to become 10.`, `The missing value is ${answer}.`],
@@ -336,16 +336,16 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     });
   };
 
-  const buildGeneratedQuestions = (level, length, sessionId) => {
+  const buildGeneratedQuestions = (level, length, sessionId, questionStyle) => {
     const rng = createRng(sessionId);
-    return Array.from({ length }, (_, index) => buildGeneratedQuestion(level, index, rng));
+    return Array.from({ length }, (_, index) => buildGeneratedQuestion(level, index, rng, questionStyle));
   };
 
   const createSession = ({ type, level, length, checkMode, timerEnabled, format, questionStyle }) => {
     const sessionId = makeId();
     const questions = type === 'curated'
       ? buildCuratedQuestions(level, length, sessionId)
-      : buildGeneratedQuestions(level, length, sessionId);
+      : buildGeneratedQuestions(level, length, sessionId, questionStyle);
     return {
       id: sessionId,
       type,

@@ -61,6 +61,13 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         </select>
       </label>
       <label class="stack-sm">
+        <span>Orientation</span>
+        <select id="worksheet-orientation" class="select">
+          <option value="ledger" selected>Ledger rows</option>
+          <option value="vertical">Vertical columns</option>
+        </select>
+      </label>
+      <label class="stack-sm">
         <span>Drills</span>
         <select id="worksheet-count" class="select">
           <option value="20">20</option>
@@ -94,7 +101,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         </div>
         <span class="badge" id="worksheet-count-badge">40 drills</span>
       </div>
-      <div class="ledger-head ledger-row">
+      <div id="worksheet-ledger-head" class="ledger-head ledger-row">
         <span>No.</span>
         <span>Drill</span>
         <span>Response</span>
@@ -177,20 +184,30 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     const chooseFamily = (level, selectedFamily) => {
       if (selectedFamily !== 'mixed') return selectedFamily;
       if (level === 'L0' || level === 'L1') return Math.random() > 0.5 ? 'addition' : 'subtraction';
+      if (level === 'L4') return Math.random() > 0.5 ? 'multiplication' : 'division';
       return Math.random() > 0.5 ? 'addition' : 'subtraction';
     };
 
-    const makeDynamicPrompt = (level, family, band) => {
+    const styleAdjustBand = (style, band) => {
+      if (style === 'speed') {
+        if (band === '4-6') return '3-4';
+        if (band === '3-4') return '2-3';
+      }
+      if (style === 'exam' && band === '2') return '2-3';
+      return band;
+    };
+
+    const makeDynamicPrompt = (level, family, band, style) => {
       const resolvedFamily = chooseFamily(level, family);
-      const digits = randomDigits(band);
+      const digits = randomDigits(styleAdjustBand(style, band));
       if (resolvedFamily === 'multiplication') {
-        const a = randomNumberForDigits(Math.min(2, digits));
-        const b = rand(2, 9);
+        const a = randomNumberForDigits(Math.min(level === 'L5' ? 3 : 2, digits));
+        const b = rand(2, level === 'L5' ? 12 : 9);
         return `${a} × ${b}`;
       }
       if (resolvedFamily === 'division') {
-        const divisor = rand(2, 9);
-        const quotient = randomNumberForDigits(Math.max(1, Math.min(2, digits)));
+        const divisor = rand(2, level === 'L5' ? 12 : 9);
+        const quotient = randomNumberForDigits(Math.max(1, Math.min(level === 'L5' ? 3 : 2, digits)));
         return `${divisor * quotient} ÷ ${divisor}`;
       }
       const aDigits = digits;
@@ -206,6 +223,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       const mode = byId('worksheet-mode').value;
       const level = byId('worksheet-level').value;
       const family = byId('worksheet-family').value;
+      const style = byId('worksheet-style').value;
       const count = Number(byId('worksheet-count').value);
       const band = byId('worksheet-band').value || levelBands[level] || '2';
       const bank = fixedBanks[level] || {};
@@ -213,27 +231,53 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       if (mode === 'fixed') {
         return Array.from({ length: count }, (_, index) => fixedFamily[index % fixedFamily.length]);
       }
-      return Array.from({ length: count }, () => makeDynamicPrompt(level, family, band));
+      return Array.from({ length: count }, () => makeDynamicPrompt(level, family, band, style));
     };
 
     const renderSheet = () => {
       const prompts = buildPrompts();
+      const orientation = byId('worksheet-orientation').value;
+      const ledgerHead = byId('worksheet-ledger-head');
       table.replaceChildren();
-      prompts.forEach((prompt, index) => {
-        const row = document.createElement('label');
-        row.className = 'ledger-row worksheet-row';
-        row.innerHTML = `
-          <span class="ledger-no">${index + 1}</span>
-          <span class="worksheet-prompt ledger-prompt">${prompt}</span>
-          <input class="input worksheet-input ledger-input" data-prompt="${prompt}" type="text" inputmode="numeric" placeholder="Write" />
-          <small class="worksheet-feedback ledger-feedback"></small>
-        `;
-        table.appendChild(row);
-      });
+      table.className = orientation === 'vertical' ? 'worksheet-table vertical-table' : 'worksheet-table ledger-table';
+      ledgerHead.hidden = orientation === 'vertical';
+      if (orientation === 'vertical') {
+        const columns = 5;
+        const perColumn = Math.ceil(prompts.length / columns);
+        for (let c = 0; c < columns; c += 1) {
+          const col = document.createElement('div');
+          col.className = 'vertical-drill-column';
+          prompts.slice(c * perColumn, (c + 1) * perColumn).forEach((prompt, index) => {
+            const absoluteIndex = c * perColumn + index;
+            const row = document.createElement('label');
+            row.className = 'vertical-drill-row';
+            row.innerHTML = `
+              <span class="ledger-no">${absoluteIndex + 1}</span>
+              <span class="worksheet-prompt vertical-prompt">${prompt}</span>
+              <input class="input worksheet-input vertical-input" data-prompt="${prompt}" type="text" inputmode="numeric" placeholder="Write" />
+              <small class="worksheet-feedback vertical-feedback"></small>
+            `;
+            col.appendChild(row);
+          });
+          table.appendChild(col);
+        }
+      } else {
+        prompts.forEach((prompt, index) => {
+          const row = document.createElement('label');
+          row.className = 'ledger-row worksheet-row';
+          row.innerHTML = `
+            <span class="ledger-no">${index + 1}</span>
+            <span class="worksheet-prompt ledger-prompt">${prompt}</span>
+            <input class="input worksheet-input ledger-input" data-prompt="${prompt}" type="text" inputmode="numeric" placeholder="Write" />
+            <small class="worksheet-feedback ledger-feedback"></small>
+          `;
+          table.appendChild(row);
+        });
+      }
       const familyLabel = byId('worksheet-family').value;
       const levelLabel = byId('worksheet-level').value;
       const bandLabel = byId('worksheet-band').value;
-      byId('worksheet-title').textContent = `${levelLabel} ${familyLabel} ledger · ${bandLabel} digits`;
+      byId('worksheet-title').textContent = `${levelLabel} ${familyLabel} ${orientation === 'vertical' ? 'columns' : 'ledger'} · ${bandLabel} digits`;
       byId('worksheet-count-badge').textContent = `${prompts.length} drills`;
       scoreCopy.textContent = 'No answers checked yet.';
     };
