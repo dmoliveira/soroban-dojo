@@ -1,0 +1,136 @@
+<section class="panel placement-shell">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Placement self-check · 見立て</p>
+      <h1>Find your calm starting point</h1>
+    </div>
+    <span class="badge">No pressure</span>
+  </div>
+  <p class="muted">Answer honestly. This self-check does not grade you harshly; it simply recommends where to begin.</p>
+
+  <div id="placement-questions" class="session-list"></div>
+
+  <div class="button-row">
+    <button class="button" id="score-placement">Get my recommendation</button>
+    <button class="button button-secondary" id="reset-placement">Reset answers</button>
+  </div>
+
+  <div id="placement-result" class="reveal-panel" hidden role="status" aria-live="polite"></div>
+</section>
+
+<script is:inline>
+  const STORAGE_KEY = 'soroban-dojo:placement-result';
+  const base = import.meta.env.BASE_URL;
+  const questions = [
+    {
+      id: 'q1',
+      prompt: 'Can you read a single soroban rod from 0 to 9 without help?',
+      options: [
+        { label: 'Not yet', score: 0 },
+        { label: 'Sometimes', score: 1 },
+        { label: 'Yes', score: 2 },
+      ],
+    },
+    {
+      id: 'q2',
+      prompt: 'Can you read two-digit place value confidently?',
+      options: [
+        { label: 'Not yet', score: 0 },
+        { label: 'A little', score: 1 },
+        { label: 'Yes', score: 2 },
+      ],
+    },
+    {
+      id: 'q3',
+      prompt: 'Can you do simple addition and subtraction on one rod?',
+      options: [
+        { label: 'Not yet', score: 0 },
+        { label: 'With effort', score: 1 },
+        { label: 'Comfortably', score: 2 },
+      ],
+    },
+    {
+      id: 'q4',
+      prompt: 'Do complements to five and ten already feel familiar?',
+      options: [
+        { label: 'No', score: 0 },
+        { label: 'Partly', score: 1 },
+        { label: 'Yes', score: 2 },
+      ],
+    },
+    {
+      id: 'q5',
+      prompt: 'Can you handle mixed operations without losing track often?',
+      options: [
+        { label: 'No', score: 0 },
+        { label: 'Sometimes', score: 1 },
+        { label: 'Yes', score: 2 },
+      ],
+    },
+    {
+      id: 'q6',
+      prompt: 'Have you practiced multiplication or division on soroban before?',
+      options: [
+        { label: 'No', score: 0 },
+        { label: 'A little', score: 1 },
+        { label: 'Yes', score: 2 },
+      ],
+    },
+  ];
+
+  const recommendations = [
+    { max: 3, level: 'L0', title: 'Foundations', reason: 'Start with reading beads, place value, and clean movement.' },
+    { max: 6, level: 'L1', title: 'Beginner', reason: 'Your next gain is steady addition and subtraction practice.' },
+    { max: 9, level: 'L2', title: 'Basic Operations', reason: 'You are ready to strengthen complements and guided review.' },
+    { max: 10, level: 'L3', title: 'Intermediate', reason: 'You can begin mixed operation fluency and first advanced drills.' },
+    { max: 12, level: 'L4', title: 'Advanced', reason: 'You appear ready for first multiplication and division pattern work.' },
+  ];
+
+  const mount = document.getElementById('placement-questions');
+  const result = document.getElementById('placement-result');
+
+  const renderQuestions = () => {
+    questions.forEach((question) => {
+      const card = document.createElement('article');
+      card.className = 'session-card';
+      const prompt = document.createElement('strong');
+      prompt.textContent = question.prompt;
+      const row = document.createElement('div');
+      row.className = 'button-row';
+      question.options.forEach((option) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'button button-secondary';
+        button.textContent = option.label;
+        button.dataset.question = question.id;
+        button.dataset.score = String(option.score);
+        button.addEventListener('click', () => {
+          document.querySelectorAll(`[data-question="${question.id}"]`).forEach((node) => node.classList.remove('is-selected'));
+          button.classList.add('is-selected');
+        });
+        row.appendChild(button);
+      });
+      card.append(prompt, row);
+      mount.appendChild(card);
+    });
+  };
+
+  const chosenScore = () => Array.from(document.querySelectorAll('.is-selected')).reduce((sum, node) => sum + Number(node.dataset.score || 0), 0);
+
+  document.getElementById('score-placement')?.addEventListener('click', () => {
+    const score = chosenScore();
+    const choice = recommendations.find((entry) => score <= entry.max) || recommendations[recommendations.length - 1];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(choice));
+    result.hidden = false;
+    result.innerHTML = `<strong>Recommended start: ${choice.level} · ${choice.title}</strong><br/>${choice.reason}<br/><a class="text-link" href="${base}levels/${choice.level.toLowerCase()}">Open ${choice.level}</a>`;
+  });
+
+  document.getElementById('reset-placement')?.addEventListener('click', () => {
+    document.querySelectorAll('.is-selected').forEach((node) => node.classList.remove('is-selected'));
+    localStorage.removeItem(STORAGE_KEY);
+    result.hidden = true;
+    result.replaceChildren();
+  });
+
+  renderQuestions();
+</script>

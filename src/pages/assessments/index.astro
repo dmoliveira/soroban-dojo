@@ -1,11 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PlacementClient from '../../components/PlacementClient.astro';
 ---
 
 <BaseLayout title="Assessments | Soroban Dojo">
   <section class="panel content-prose">
     <p class="eyebrow">Assessments</p>
     <h1>Milestones and self-checks</h1>
-    <p>The first version includes lesson checks and a progress review flow. Placement and milestone assessments can expand from this base.</p>
+    <p>Use the placement self-check to find a respectful starting level, then return later for milestone reviews.</p>
   </section>
+  <PlacementClient />
 </BaseLayout>
