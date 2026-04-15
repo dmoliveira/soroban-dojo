@@ -242,6 +242,8 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     { level: 'L2', title: 'Complement to ten', prompt: 'You are at 7. Which number completes the value to 10?', answer: 3, steps: ['Ask what 7 needs to become 10.', 'The missing part is 3.', '7 and 3 are a complement pair to 10.'], visualValue: 10 },
     { level: 'L2', title: 'Add three to seven', prompt: 'Start from 7. Add 3.', answer: 10, steps: ['Start at 7.', 'Notice 7 needs 3 to become 10.', 'Complete the ten.', '7 + 3 = 10.'], visualValue: 10 },
     { level: 'L2', title: 'Add three to two', prompt: 'Start from 2. Add 3 using the complement to 5.', answer: 5, steps: ['Start at 2.', 'Use the complement pair 2 and 3.', 'Move to the clean five shape.', '2 + 3 = 5.'], visualValue: 5 },
+    { level: 'L5', title: 'Mental sequence warmup', prompt: 'Without moving beads, solve 18 + 7 + 5.', answer: 30, steps: ['Start at 18.', 'Add 7 to reach 25.', 'Add 5 to reach 30.'], visualValue: 30 },
+    { level: 'L5', title: 'Mental mixed review', prompt: 'Without moving beads, solve 24 - 6 + 8.', answer: 26, steps: ['Start at 24.', 'Subtract 6 to reach 18.', 'Add 8 to reach 26.'], visualValue: 26 },
   ];
 
   const byId = (id) => document.getElementById(id);
@@ -273,7 +275,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
   };
   const pick = (rng, items) => items[Math.floor(rng() * items.length)];
 
-  const buildGeneratedQuestion = (level, index, rng, questionStyle = 'mixed') => {
+    const buildGeneratedQuestion = (level, index, rng, questionStyle = 'mixed') => {
     if (level === 'L0') {
       const a = Math.floor(rng() * 4) + 1;
       const b = Math.floor(rng() * (5 - a)) + 1;
@@ -314,8 +316,23 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         steps: [`Start at ${a}.`, `Add ${b}.`, `${a} + ${b} = ${a + b}.`],
       };
     }
-      const base = Math.floor(rng() * 8) + 1;
-      const answer = 10 - base;
+    if (level === 'L5' || questionStyle === 'mental') {
+      const a = Math.floor(rng() * 40) + 10;
+      const b = Math.floor(rng() * 20) + 5;
+      const c = Math.floor(rng() * 10) + 1;
+      const answer = a + b - c;
+      return {
+        id: `g-${level}-${index}`,
+        progressKey: `generated-${simpleSlug(`${level}-${a}-${b}-${c}-${answer}`)}`,
+        title: `Generated mental drill ${index + 1}`,
+        prompt: `Without moving beads, solve ${a} + ${b} - ${c}.`,
+        answer,
+        visualValue: answer,
+        steps: [`Start at ${a}.`, `Add ${b} to reach ${a + b}.`, `Subtract ${c} to reach ${answer}.`],
+      };
+    }
+    const base = Math.floor(rng() * 8) + 1;
+    const answer = 10 - base;
       return {
       id: `g-${level}-${index}`,
       progressKey: `generated-${simpleSlug(`${level}-${base}-${answer}`)}`,
@@ -328,7 +345,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
   };
 
   const buildCuratedQuestions = (level, length, sessionId) => {
-    const allowed = curatedBank.filter((item) => item.level === level || (level === 'L2' && ['L0', 'L1', 'L2'].includes(item.level)) || (level === 'L1' && ['L0', 'L1'].includes(item.level)));
+    const allowed = curatedBank.filter((item) => item.level === level || (level === 'L2' && ['L0', 'L1', 'L2'].includes(item.level)) || (level === 'L1' && ['L0', 'L1'].includes(item.level)) || (level === 'L5' && ['L2','L3','L4','L5'].includes(item.level)));
     const rng = createRng(sessionId);
     return Array.from({ length }, (_, index) => {
       const source = pick(rng, allowed);
