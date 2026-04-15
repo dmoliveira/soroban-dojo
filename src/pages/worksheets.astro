@@ -198,14 +198,20 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 
     const solvePrompt = (prompt) => {
       const normalized = prompt.replace('×', '*').replace('÷', '/');
-      const [left, operator, right] = normalized.split(' ');
-      const a = Number(left);
-      const b = Number(right);
-      if (operator === '+') return a + b;
-      if (operator === '-') return a - b;
-      if (operator === '*') return a * b;
-      if (operator === '/') return a / b;
-      return null;
+      const tokens = normalized.split(' ');
+      if (tokens.length < 3) return null;
+      let total = Number(tokens[0]);
+      for (let i = 1; i < tokens.length; i += 2) {
+        const operator = tokens[i];
+        const value = Number(tokens[i + 1]);
+        if (Number.isNaN(total) || Number.isNaN(value)) return null;
+        if (operator === '+') total += value;
+        else if (operator === '-') total -= value;
+        else if (operator === '*') total *= value;
+        else if (operator === '/') total /= value;
+        else return null;
+      }
+      return total;
     };
 
     const renderVerticalPrompt = (prompt) => {
