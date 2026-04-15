@@ -684,11 +684,11 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     updateCurrentResponse({ input, verified: true, correct });
     const feedback = byId('feedback-panel');
     feedback.hidden = false;
-    feedback.textContent = correct ? 'Correct. You may continue or reveal the steps to study the method.' : 'Not correct yet. Try again or choose how much to reveal.';
+    feedback.textContent = correct ? 'Correct. Your response matches the answer. You may continue or reveal the method to study it.' : 'Not correct yet. Revise your response, or reveal the answer or the method.';
 
     if (currentSession.checkMode === 'final' || currentSession.checkMode === 'steps') {
       updateCurrentResponse({ revealedFinal: true });
-      feedback.textContent += ` Final number: ${question.answer}.`;
+      feedback.textContent += ` Answer: ${question.answer}.`;
     }
     if (currentSession.checkMode === 'steps') {
       updateCurrentResponse({ revealedSteps: true });
