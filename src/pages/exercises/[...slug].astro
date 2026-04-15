@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SorobanVisualizer from '../../components/SorobanVisualizer.astro';
+import { numberToKanji } from '../../lib/japanese';
+
+export async function getStaticPaths() {
+  const exercises = await getCollection('exercises');
+  return exercises.map((exercise) => ({ params: { slug: exercise.slug }, props: { exercise } }));
+}
+
+const { exercise } = Astro.props;
+const { Content } = await render(exercise);
+---
+
+<BaseLayout title={`${exercise.data.title} | Soroban Dojo`}>
+  <article class="panel content-prose">
+    <p class="eyebrow">Exercise · {exercise.data.level}</p>
+    <h1>{exercise.data.title}</h1>
+    <div class="meta-row">
+      <span>{exercise.data.skill}</span>
+      <span>{exercise.data.type}</span>
+      <span>{exercise.data.estimatedMinutes} min</span>
+      {exercise.data.visualValue !== undefined && <span>数 {numberToKanji(exercise.data.visualValue)}</span>}
+    </div>
+    <p><strong>Practice rule:</strong> try this before opening the hint or answer.</p>
+    {exercise.data.visualValue !== undefined && (
+      <SorobanVisualizer value={exercise.data.visualValue} stepValues={exercise.data.stepValues} label={`Visual support for ${exercise.data.title}`} />
+    )}
+    <Content />
+    <details>
+      <summary>Need a hint?</summary>
+      <p>{exercise.data.hint}</p>
+    </details>
+    <details>
+      <summary>Check the answer</summary>
+      <p><strong>{exercise.data.answer}</strong></p>
+      <p>{exercise.data.explanation}</p>
+    </details>
+  </article>
+</BaseLayout>

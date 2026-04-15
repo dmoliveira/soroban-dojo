@@ -1,0 +1,656 @@
+---
+interface ExerciseSummary {
+  id: string;
+  slug: string;
+  title: string;
+  level: string;
+  skill: string;
+}
+
+interface Props {
+  exercises: ExerciseSummary[];
+}
+
+const { exercises } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="practice-stack" data-library={JSON.stringify(exercises)}>
+  <section class="panel practice-options">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Dojo practice</p>
+        <h1>Choose how you want to train today</h1>
+      </div>
+      <span class="badge">Attempt first · 先に挑戦</span>
+    </div>
+    <div class="option-grid">
+      <article class="choice-card">
+        <p class="eyebrow">Curated</p>
+        <h3>Fixed lesson-aligned list</h3>
+        <p>Use an authored sequence to reinforce the current curriculum in a calm order.</p>
+      </article>
+      <article class="choice-card">
+        <p class="eyebrow">Generated</p>
+        <h3>New drill list</h3>
+        <p>Create a replayable session with its own ID so you can resume or replay the same list later.</p>
+      </article>
+      <article class="choice-card">
+        <p class="eyebrow">Review</p>
+        <h3>Resume from history</h3>
+        <p>Continue where you stopped, compare scores, or replay a past list with a fresh answer sheet.</p>
+      </article>
+    </div>
+    <div class="practice-grid">
+      <div class="stack-sm">
+        <label class="stack-sm">
+          <span>Session type · 稽古</span>
+          <select id="session-type" class="select">
+            <option value="curated">Curated list</option>
+            <option value="generated">Generated drill</option>
+          </select>
+        </label>
+        <label class="stack-sm">
+          <span>Level focus · 段階</span>
+          <select id="session-level" class="select">
+            <option value="L0">L0 Foundations</option>
+            <option value="L1">L1 Beginner</option>
+            <option value="L2">L2 Complements</option>
+          </select>
+        </label>
+        <label class="stack-sm">
+          <span>List length · 問題数</span>
+          <select id="session-length" class="select">
+            <option value="5">5 questions</option>
+            <option value="10" selected>10 questions</option>
+            <option value="15">15 questions</option>
+          </select>
+        </label>
+      </div>
+      <div class="stack-sm">
+        <label class="stack-sm">
+          <span>Check style · 確認</span>
+          <select id="check-mode" class="select">
+            <option value="verify">Verify only</option>
+            <option value="final">Verify and show final number</option>
+            <option value="steps">Verify and show steps</option>
+          </select>
+        </label>
+        <label class="stack-sm">
+          <span>Timer · 時間</span>
+          <select id="timer-mode" class="select">
+            <option value="off">Timer off</option>
+            <option value="on">Timer on</option>
+          </select>
+        </label>
+        <div class="button-row">
+          <button class="button" id="start-session">Start new session</button>
+          <button class="button button-secondary" id="resume-latest">Resume latest</button>
+        </div>
+        <label class="stack-sm">
+          <span>Resume by session ID · 続き</span>
+          <input id="session-id-input" class="input" type="text" placeholder="Paste a saved session ID" />
+        </label>
+        <button class="button button-secondary" id="resume-by-id">Open saved ID</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="practice-grid">
+    <section class="panel question-shell">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Current session</p>
+          <h2 id="session-title">No session selected yet</h2>
+        </div>
+        <div class="stack-sm small muted">
+          <div id="session-id">Session ID —</div>
+          <div id="session-progress">Question 0 / 0</div>
+          <div id="session-score">Score —</div>
+          <div id="session-timer">Timer off</div>
+        </div>
+      </div>
+
+      <div id="visual-mount" class="subtle-panel" hidden></div>
+      <div class="subtle-panel">
+        <p class="eyebrow">Question</p>
+        <h3 id="question-title">Choose a session to begin.</h3>
+        <p id="question-prompt" class="muted">Curated lists follow the lessons; generated lists create replayable arithmetic practice.</p>
+      </div>
+
+      <label class="stack-sm">
+        <span>Your answer · 答え</span>
+        <input id="answer-input" class="input" type="text" inputmode="numeric" placeholder="Write your answer before checking" />
+      </label>
+
+      <div class="button-row">
+        <button class="button" id="verify-answer">Check my answer</button>
+        <button class="button button-secondary" id="reveal-final">Show final number</button>
+        <button class="button button-secondary" id="reveal-steps">Show steps</button>
+        <button class="button button-secondary" id="next-question">Save and continue</button>
+      </div>
+
+      <div id="feedback-panel" class="reveal-panel" hidden role="status" aria-live="polite"></div>
+      <div id="steps-panel" class="reveal-panel" hidden aria-live="polite"></div>
+      <div class="review-chip-row">
+        <span class="review-chip">Verify only if you just want confirmation</span>
+        <span class="review-chip">Reveal the final number when you want a quick check</span>
+        <span class="review-chip">Reveal steps when you want to study the method</span>
+        <span class="review-chip">Resume or replay later with the saved session ID</span>
+      </div>
+    </section>
+
+    <aside class="panel stack-sm">
+      <div>
+        <p class="eyebrow">Session history</p>
+        <h2>Resume or replay</h2>
+      </div>
+      <div id="history-list" class="session-list">
+        <p class="muted">Your saved sessions will appear here.</p>
+      </div>
+
+      <div>
+        <p class="eyebrow">Exercise library</p>
+        <h3>Study by lesson if you prefer</h3>
+        <ul class="list-clean">
+          {exercises.slice(0, 6).map((exercise) => (
+            <li>
+              <strong>{exercise.title}</strong>
+              <div class="meta-row">
+                <span>{exercise.level}</span>
+                <span>{exercise.skill}</span>
+              </div>
+              <a class="text-link" href={`${base}exercises/${exercise.slug}`}>Open library item →</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script is:inline>
+  const root = document.querySelector('.practice-stack');
+  const library = JSON.parse(root?.dataset.library || '[]');
+  const SESSION_KEY = 'soroban-dojo:practice-sessions';
+  const TIMER_KEY = 'soroban-dojo:timer-history';
+  const EXERCISE_STATE_KEY = 'soroban-dojo:exercise-states';
+  let currentSession = null;
+  let timerInterval = null;
+  let questionStartedAt = null;
+  let activeTimerKey = null;
+
+  const curatedBank = [
+    { level: 'L0', title: 'Read seven', prompt: 'Read one upper bead and two lower beads touching the beam.', answer: 7, steps: ['Start with 5 for the upper bead.', 'Add 2 from the lower beads.', '5 + 2 = 7.'], visualValue: 7 },
+    { level: 'L0', title: 'Read twenty-four', prompt: 'Read 2 on the tens rod and 4 on the ones rod.', answer: 24, steps: ['The tens rod gives 20.', 'The ones rod gives 4.', '20 + 4 = 24.'], visualValue: 24 },
+    { level: 'L0', title: 'Set thirty-one', prompt: 'What number do you make by setting 3 on tens and 1 on ones?', answer: 31, steps: ['The tens rod means 30.', 'The ones rod means 1.', '30 + 1 = 31.'], visualValue: 31 },
+    { level: 'L1', title: 'Add two and three', prompt: 'Start from 2. Add 3.', answer: 5, steps: ['Start at 2.', 'Add 3.', 'The rod becomes the clean five shape.', '2 + 3 = 5.'], visualValue: 5 },
+    { level: 'L1', title: 'Add four and four', prompt: 'Start from 4. Add 4.', answer: 8, steps: ['Start at 4.', 'Add 4.', 'Read the rod as 5 + 3.', '4 + 4 = 8.'], visualValue: 8 },
+    { level: 'L1', title: 'Subtract two from eight', prompt: 'Start from 8. Subtract 2.', answer: 6, steps: ['Start at 8.', 'Remove 2.', 'Read the rod again: 6.', '8 - 2 = 6.'], visualValue: 6 },
+    { level: 'L2', title: 'Complement to five', prompt: 'You are at 2. Which number completes the rod to 5?', answer: 3, steps: ['Ask what 2 needs to become 5.', 'The missing part is 3.', '2 and 3 are a complement pair to 5.'], visualValue: 5 },
+    { level: 'L2', title: 'Complement to ten', prompt: 'You are at 7. Which number completes the value to 10?', answer: 3, steps: ['Ask what 7 needs to become 10.', 'The missing part is 3.', '7 and 3 are a complement pair to 10.'], visualValue: 10 },
+    { level: 'L2', title: 'Add three to seven', prompt: 'Start from 7. Add 3.', answer: 10, steps: ['Start at 7.', 'Notice 7 needs 3 to become 10.', 'Complete the ten.', '7 + 3 = 10.'], visualValue: 10 },
+    { level: 'L2', title: 'Add three to two', prompt: 'Start from 2. Add 3 using the complement to 5.', answer: 5, steps: ['Start at 2.', 'Use the complement pair 2 and 3.', 'Move to the clean five shape.', '2 + 3 = 5.'], visualValue: 5 },
+  ];
+
+  const byId = (id) => document.getElementById(id);
+  const readSessions = () => {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || '[]'); } catch { return []; }
+  };
+  const writeSessions = (sessions) => localStorage.setItem(SESSION_KEY, JSON.stringify(sessions));
+  const appendTimer = (entry) => {
+    try {
+      const current = JSON.parse(localStorage.getItem(TIMER_KEY) || '[]');
+      current.push(entry);
+      localStorage.setItem(TIMER_KEY, JSON.stringify(current));
+    } catch {}
+  };
+  const readExerciseStates = () => {
+    try { return JSON.parse(localStorage.getItem(EXERCISE_STATE_KEY) || '{}'); } catch { return {}; }
+  };
+  const writeExerciseStates = (state) => localStorage.setItem(EXERCISE_STATE_KEY, JSON.stringify(state));
+
+  const makeId = () => `dojo-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  const simpleSlug = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  const hash = (value) => Array.from(value).reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0);
+  const createRng = (seed) => {
+    let state = Math.abs(hash(seed)) || 1;
+    return () => {
+      state = (state * 1664525 + 1013904223) % 4294967296;
+      return state / 4294967296;
+    };
+  };
+  const pick = (rng, items) => items[Math.floor(rng() * items.length)];
+
+  const buildGeneratedQuestion = (level, index, rng) => {
+    if (level === 'L0') {
+      const tens = Math.floor(rng() * 4) + 1;
+      const ones = Math.floor(rng() * 9);
+      const answer = tens * 10 + ones;
+      return {
+        id: `g-${level}-${index}`,
+        progressKey: `generated-${simpleSlug(`${level}-${answer}`)}`,
+        title: `Generated reading ${index + 1}`,
+        prompt: `Read ${tens} on the tens rod and ${ones} on the ones rod. What number is shown?`,
+        answer,
+        visualValue: answer,
+        steps: [`${tens} on tens means ${tens * 10}.`, `${ones} on ones means ${ones}.`, `${tens * 10} + ${ones} = ${answer}.`],
+      };
+    }
+    if (level === 'L1') {
+      const a = Math.floor(rng() * 8) + 1;
+      const b = Math.floor(rng() * (9 - a)) + 1;
+      const subtract = rng() > 0.5;
+      if (subtract) {
+        const start = a + b;
+        return {
+          id: `g-${level}-${index}`,
+          progressKey: `generated-${simpleSlug(`${level}-${start}-${b}-${a}`)}`,
+          title: `Generated subtraction ${index + 1}`,
+          prompt: `Start from ${start}. Subtract ${b}. What is the final value?`,
+          answer: a,
+          visualValue: a,
+          steps: [`Start at ${start}.`, `Subtract ${b}.`, `${start} - ${b} = ${a}.`],
+        };
+      }
+      return {
+        id: `g-${level}-${index}`,
+        progressKey: `generated-${simpleSlug(`${level}-${a}-${b}-${a + b}`)}`,
+        title: `Generated addition ${index + 1}`,
+        prompt: `Start from ${a}. Add ${b}. What is the final value?`,
+        answer: a + b,
+        visualValue: a + b,
+        steps: [`Start at ${a}.`, `Add ${b}.`, `${a} + ${b} = ${a + b}.`],
+      };
+    }
+    const base = Math.floor(rng() * 8) + 1;
+    const answer = 10 - base;
+    return {
+      id: `g-${level}-${index}`,
+      progressKey: `generated-${simpleSlug(`${level}-${base}-${answer}`)}`,
+      title: `Generated complement ${index + 1}`,
+      prompt: `You are at ${base}. Which number completes the value to 10?`,
+      answer,
+      visualValue: 10,
+      steps: [`Start at ${base}.`, `Ask what ${base} needs to become 10.`, `The missing value is ${answer}.`],
+    };
+  };
+
+  const buildCuratedQuestions = (level, length, sessionId) => {
+    const allowed = curatedBank.filter((item) => item.level === level || (level === 'L2' && ['L0', 'L1', 'L2'].includes(item.level)) || (level === 'L1' && ['L0', 'L1'].includes(item.level)));
+    const rng = createRng(sessionId);
+    return Array.from({ length }, (_, index) => {
+      const source = pick(rng, allowed);
+      return { ...source, id: `${sessionId}-c-${index}`, progressKey: `curated-${simpleSlug(source.title)}` };
+    });
+  };
+
+  const buildGeneratedQuestions = (level, length, sessionId) => {
+    const rng = createRng(sessionId);
+    return Array.from({ length }, (_, index) => buildGeneratedQuestion(level, index, rng));
+  };
+
+  const createSession = ({ type, level, length, checkMode, timerEnabled }) => {
+    const sessionId = makeId();
+    const questions = type === 'curated'
+      ? buildCuratedQuestions(level, length, sessionId)
+      : buildGeneratedQuestions(level, length, sessionId);
+    return {
+      id: sessionId,
+      type,
+      level,
+      length,
+      checkMode,
+      timerEnabled,
+      createdAt: new Date().toISOString(),
+      currentIndex: 0,
+      completed: false,
+      questions,
+      responses: {},
+      finalScore: null,
+    };
+  };
+
+  const persistCurrent = () => {
+    if (!currentSession) return;
+    const sessions = readSessions();
+    const existingIndex = sessions.findIndex((entry) => entry.id === currentSession.id);
+    if (existingIndex >= 0) sessions.splice(existingIndex, 1);
+    sessions.unshift(currentSession);
+    writeSessions(sessions.slice(0, 12));
+  };
+
+  const responseForCurrent = () => currentSession?.responses?.[currentSession.currentIndex] || {
+    input: '',
+    hintsUsed: 0,
+    revealedFinal: false,
+    revealedSteps: false,
+    verified: false,
+    correct: false,
+    seconds: 0,
+  };
+
+  const computeQuestionScore = (response) => {
+    if (!response || !response.verified) return 0;
+    if (response.correct && !response.revealedFinal && !response.revealedSteps && !response.hintsUsed) return 100;
+    if (response.correct && !response.revealedSteps) return 85;
+    if (response.correct) return 70;
+    if (response.revealedSteps || response.revealedFinal) return 40;
+    return 15;
+  };
+
+  const computeSessionScore = (session) => {
+    const total = session.questions.reduce((sum, _, index) => sum + computeQuestionScore(session.responses[index]), 0);
+    return Math.round(total / session.questions.length);
+  };
+
+  const stopTimer = () => {
+    if (timerInterval) window.clearInterval(timerInterval);
+    timerInterval = null;
+    if (!currentSession || !currentSession.timerEnabled || !questionStartedAt) return;
+    const seconds = Math.max(1, Math.round((Date.now() - questionStartedAt) / 1000));
+    const existing = responseForCurrent();
+    currentSession.responses[currentSession.currentIndex] = { ...existing, seconds: (existing.seconds || 0) + seconds };
+    appendTimer({ id: currentSession.id, questionIndex: currentSession.currentIndex, seconds, endedAt: new Date().toISOString() });
+    questionStartedAt = null;
+    activeTimerKey = null;
+  };
+
+  const syncExerciseProgress = () => {
+    if (!currentSession) return;
+    const question = currentSession.questions[currentSession.currentIndex];
+    const response = responseForCurrent();
+    const existing = readExerciseStates();
+    existing[question.progressKey || question.id] = {
+      status: response.correct ? 'got-it' : 'needs-review',
+      sessionId: currentSession.id,
+      updatedAt: new Date().toISOString(),
+    };
+    writeExerciseStates(existing);
+  };
+
+  const renderVisual = (value) => {
+    const mount = byId('visual-mount');
+    mount.replaceChildren();
+    if (value === undefined || value === null) {
+      mount.hidden = true;
+      return;
+    }
+    const board = document.createElement('div');
+    board.className = 'soroban-board';
+    String(value).split('').forEach((digitText) => {
+      const digit = Number(digitText);
+      const rod = document.createElement('div');
+      rod.className = 'rod';
+      const upper = document.createElement('div');
+      upper.className = `bead upper ${digit >= 5 ? 'active' : ''}`;
+      rod.appendChild(upper);
+      const beam = document.createElement('div');
+      beam.className = 'beam';
+      rod.appendChild(beam);
+      Array.from({ length: 4 }, (_, index) => {
+        const bead = document.createElement('div');
+        bead.className = `bead lower ${index < digit % 5 ? 'active' : ''}`;
+        rod.appendChild(bead);
+      });
+      board.appendChild(rod);
+    });
+    mount.appendChild(board);
+    mount.hidden = false;
+  };
+
+  const renderHistory = () => {
+    const historyList = byId('history-list');
+    const sessions = readSessions();
+    historyList.replaceChildren();
+    if (!sessions.length) {
+      const note = document.createElement('p');
+      note.className = 'muted';
+      note.textContent = 'Your saved sessions will appear here.';
+      historyList.appendChild(note);
+      return;
+    }
+    sessions.forEach((session) => {
+      const card = document.createElement('article');
+      card.className = 'session-card';
+      const title = document.createElement('strong');
+      title.textContent = `${session.type === 'curated' ? 'Curated' : 'Generated'} · ${session.level}`;
+      const meta = document.createElement('p');
+      meta.className = 'muted small';
+      meta.textContent = `${session.id} · ${session.completed ? session.questions.length : session.currentIndex}/${session.questions.length} complete`;
+      const score = document.createElement('div');
+      score.className = 'score-band';
+      score.textContent = session.completed ? `${session.finalScore}/100` : 'In progress';
+      const actions = document.createElement('div');
+      actions.className = 'button-row';
+      const resume = document.createElement('button');
+      resume.className = 'button button-secondary';
+      resume.textContent = 'Resume';
+      resume.addEventListener('click', () => { stopTimer(); currentSession = session; renderSession(); });
+      const replay = document.createElement('button');
+      replay.className = 'button button-secondary';
+      replay.textContent = 'Replay list';
+      replay.addEventListener('click', () => {
+        stopTimer();
+        const copy = {
+          ...session,
+          id: makeId(),
+          createdAt: new Date().toISOString(),
+          currentIndex: 0,
+          completed: false,
+          responses: {},
+          finalScore: null,
+        };
+        currentSession = copy;
+        persistCurrent();
+        renderHistory();
+        renderSession();
+      });
+      actions.append(resume, replay);
+      card.append(title, meta, score, actions);
+      historyList.appendChild(card);
+    });
+  };
+
+  const renderSession = () => {
+    const title = byId('session-title');
+    const sessionIdLabel = byId('session-id');
+    const progress = byId('session-progress');
+    const score = byId('session-score');
+    const timer = byId('session-timer');
+    const questionTitle = byId('question-title');
+    const questionPrompt = byId('question-prompt');
+    const answerInput = byId('answer-input');
+    const feedback = byId('feedback-panel');
+    const stepsPanel = byId('steps-panel');
+    const controls = ['answer-input', 'verify-answer', 'reveal-final', 'reveal-steps', 'next-question'];
+    feedback.hidden = true;
+    stepsPanel.hidden = true;
+
+    if (!currentSession) {
+      title.textContent = 'No session selected yet';
+      sessionIdLabel.textContent = 'Session ID —';
+      progress.textContent = 'Question 0 / 0';
+      score.textContent = 'Score —';
+      timer.textContent = 'Timer off';
+      questionTitle.textContent = 'Choose a session to begin.';
+      questionPrompt.textContent = 'Curated lists follow the lessons; generated lists create replayable arithmetic practice.';
+      answerInput.value = '';
+      renderVisual(null);
+      controls.forEach((id) => { const node = byId(id); if (node) node.disabled = true; });
+      activeTimerKey = null;
+      return;
+    }
+
+    const question = currentSession.questions[currentSession.currentIndex];
+    const response = responseForCurrent();
+    title.textContent = `${currentSession.type === 'curated' ? 'Curated' : 'Generated'} ${currentSession.level} session`;
+    sessionIdLabel.textContent = `Session ID ${currentSession.id}`;
+    progress.textContent = `Question ${currentSession.currentIndex + 1} / ${currentSession.questions.length}`;
+    score.textContent = `Score ${(currentSession.completed ? currentSession.finalScore : computeSessionScore(currentSession)) || 0}/100`;
+    timer.textContent = currentSession.timerEnabled ? 'Timer on' : 'Timer off';
+    questionTitle.textContent = currentSession.completed ? 'Session completed' : question.title;
+    questionPrompt.textContent = currentSession.completed
+      ? 'Review your score, replay the same list, or start a fresh session with a new ID.'
+      : question.prompt;
+    answerInput.value = response.input || '';
+    controls.forEach((id) => { const node = byId(id); if (node) node.disabled = currentSession.completed; });
+    renderVisual(question.visualValue);
+
+    if (currentSession.timerEnabled && !currentSession.completed) {
+      const nextTimerKey = `${currentSession.id}:${currentSession.currentIndex}`;
+      if (activeTimerKey !== nextTimerKey) {
+        if (timerInterval) window.clearInterval(timerInterval);
+        const carriedSeconds = response.seconds || 0;
+        questionStartedAt = Date.now() - (carriedSeconds * 1000);
+        activeTimerKey = nextTimerKey;
+        timerInterval = window.setInterval(() => {
+          const seconds = Math.round((Date.now() - questionStartedAt) / 1000);
+          timer.textContent = `Timer ${seconds}s`;
+        }, 1000);
+      }
+    } else {
+      if (timerInterval) window.clearInterval(timerInterval);
+      timerInterval = null;
+      questionStartedAt = null;
+      activeTimerKey = null;
+      if (currentSession.completed) {
+        timer.textContent = 'Session complete';
+      }
+    }
+
+    if (response.verified) {
+      feedback.hidden = false;
+      if (response.correct && !response.revealedFinal && !response.revealedSteps) {
+        feedback.textContent = 'Correct. Keep your hands calm and move to the next question when ready.';
+      } else if (response.revealedSteps) {
+        feedback.textContent = `Final number: ${question.answer}. The full step method is open below.`;
+      } else if (response.revealedFinal) {
+        feedback.textContent = `Final number: ${question.answer}. Use this when you only want a quick result check.`;
+      } else {
+        feedback.textContent = 'Not correct yet. You can try again, reveal the final number, or open the steps.';
+      }
+    }
+    if (response.revealedSteps) {
+      stepsPanel.hidden = false;
+      stepsPanel.replaceChildren();
+      const list = document.createElement('ol');
+      question.steps.forEach((step) => {
+        const item = document.createElement('li');
+        item.textContent = step;
+        list.appendChild(item);
+      });
+      stepsPanel.appendChild(list);
+    }
+    persistCurrent();
+    renderHistory();
+  };
+
+  const updateCurrentResponse = (next) => {
+    if (!currentSession) return;
+    currentSession.responses[currentSession.currentIndex] = {
+      ...responseForCurrent(),
+      ...next,
+    };
+    persistCurrent();
+  };
+
+  byId('start-session')?.addEventListener('click', () => {
+    stopTimer();
+    currentSession = createSession({
+      type: byId('session-type').value,
+      level: byId('session-level').value,
+      length: Number(byId('session-length').value),
+      checkMode: byId('check-mode').value,
+      timerEnabled: byId('timer-mode').value === 'on',
+    });
+    persistCurrent();
+    renderSession();
+  });
+
+  byId('resume-latest')?.addEventListener('click', () => {
+    stopTimer();
+    const latest = readSessions()[0];
+    if (!latest) return;
+    currentSession = latest;
+    renderSession();
+  });
+
+  byId('resume-by-id')?.addEventListener('click', () => {
+    stopTimer();
+    const requestedId = byId('session-id-input').value.trim();
+    if (!requestedId) return;
+    const match = readSessions().find((entry) => entry.id === requestedId);
+    const feedback = byId('feedback-panel');
+    if (!match) {
+      feedback.hidden = false;
+      feedback.textContent = 'No saved session matched that ID on this device.';
+      return;
+    }
+    currentSession = match;
+    renderSession();
+  });
+
+  byId('verify-answer')?.addEventListener('click', () => {
+    if (!currentSession || currentSession.completed) return;
+    const question = currentSession.questions[currentSession.currentIndex];
+    const input = byId('answer-input').value.trim();
+    const numericInput = Number(input);
+    const correct = input !== '' && !Number.isNaN(numericInput) && numericInput === question.answer;
+    updateCurrentResponse({ input, verified: true, correct });
+    const feedback = byId('feedback-panel');
+    feedback.hidden = false;
+    feedback.textContent = correct ? 'Correct. You may continue or reveal the steps to study the method.' : 'Not correct yet. Try again or choose how much to reveal.';
+
+    if (currentSession.checkMode === 'final' || currentSession.checkMode === 'steps') {
+      updateCurrentResponse({ revealedFinal: true });
+      feedback.textContent += ` Final number: ${question.answer}.`;
+    }
+    if (currentSession.checkMode === 'steps') {
+      updateCurrentResponse({ revealedSteps: true });
+    }
+    renderSession();
+  });
+
+  byId('reveal-final')?.addEventListener('click', () => {
+    if (!currentSession || currentSession.completed) return;
+    const question = currentSession.questions[currentSession.currentIndex];
+    updateCurrentResponse({ revealedFinal: true, verified: true, correct: responseForCurrent().correct || false, input: byId('answer-input').value.trim() });
+    renderSession();
+  });
+
+  byId('reveal-steps')?.addEventListener('click', () => {
+    if (!currentSession || currentSession.completed) return;
+    updateCurrentResponse({ revealedSteps: true, revealedFinal: true, verified: true, correct: responseForCurrent().correct || false, input: byId('answer-input').value.trim() });
+    renderSession();
+  });
+
+  byId('next-question')?.addEventListener('click', () => {
+    if (!currentSession || currentSession.completed) return;
+    stopTimer();
+    const currentResponse = responseForCurrent();
+    updateCurrentResponse({
+      input: byId('answer-input').value.trim(),
+      verified: currentResponse.verified || byId('answer-input').value.trim() !== '',
+      correct: currentResponse.correct || false,
+    });
+    if (currentSession.currentIndex < currentSession.questions.length - 1) {
+      syncExerciseProgress();
+      currentSession.currentIndex += 1;
+      renderSession();
+      return;
+    }
+    currentSession.completed = true;
+    currentSession.finalScore = computeSessionScore(currentSession);
+    syncExerciseProgress();
+    persistCurrent();
+    renderSession();
+    const feedback = byId('feedback-panel');
+    feedback.hidden = false;
+    feedback.textContent = `Session complete. Final score: ${currentSession.finalScore}/100. You can replay the same list from the history panel or start a fresh session.`;
+    renderHistory();
+  });
+
+  renderHistory();
+  renderSession();
+</script>

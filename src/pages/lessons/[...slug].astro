@@ -1,0 +1,77 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SorobanVisualizer from '../../components/SorobanVisualizer.astro';
+import { numberToKanji } from '../../lib/japanese';
+
+export async function getStaticPaths() {
+  const lessons = await getCollection('lessons');
+  return lessons.map((lesson) => ({ params: { slug: lesson.slug }, props: { lesson } }));
+}
+
+const { lesson } = Astro.props;
+const { Content } = await render(lesson);
+const relatedExercises = (await getCollection('exercises')).filter((entry) => lesson.data.relatedExercises.includes(entry.data.id));
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={`${lesson.data.title} | Soroban Dojo`} description={lesson.data.summary}>
+  <article class="panel content-prose">
+    <p class="eyebrow">Lesson · {lesson.data.level}</p>
+    <h1>{lesson.data.title}</h1>
+    <div class="meta-row">
+      <span>{lesson.data.skill}</span>
+      <span>{lesson.data.estimatedMinutes} min</span>
+      <span>{lesson.data.audience.join(', ')}</span>
+      {lesson.data.visualValue !== undefined && <span>数 {numberToKanji(lesson.data.visualValue)}</span>}
+    </div>
+    <p>{lesson.data.summary}</p>
+    {lesson.data.visualValue !== undefined && (
+      <SorobanVisualizer value={lesson.data.visualValue} stepValues={lesson.data.stepValues} label={`Worked visual for ${lesson.data.title}`} />
+    )}
+    <div class="button-row">
+      <button class="button button-secondary lesson-complete-toggle" data-lesson-id={lesson.data.id}>Mark lesson complete</button>
+      <a class="button button-secondary" href={`${base}progress`}>View progress</a>
+    </div>
+    <h2>Objectives</h2>
+    <ul>
+      {lesson.data.objectives.map((objective) => <li>{objective}</li>)}
+    </ul>
+    <Content />
+    <h2>Related exercises</h2>
+    <ul class="list-clean">
+      {relatedExercises.map((exercise) => (
+        <li>
+          <strong>{exercise.data.title}</strong>
+          <p>{exercise.data.explanation}</p>
+          <a class="text-link" href={`${base}exercises/${exercise.slug}`}>Try exercise →</a>
+        </li>
+      ))}
+    </ul>
+  </article>
+
+  <script is:inline define:vars={{ lessonId: lesson.data.id }}>
+    const lessonKey = 'soroban-dojo:completed-lessons';
+    const button = document.querySelector('.lesson-complete-toggle');
+    const readLessons = () => {
+      try {
+        return JSON.parse(localStorage.getItem(lessonKey) || '[]');
+      } catch {
+        return [];
+      }
+    };
+    const syncLabel = () => {
+      const current = readLessons();
+      const done = current.includes(lessonId);
+      button.textContent = done ? 'Lesson completed' : 'Mark lesson complete';
+      button.setAttribute('aria-pressed', String(done));
+    };
+    button?.addEventListener('click', () => {
+      const current = readLessons();
+      const next = current.includes(lessonId) ? current.filter((entry) => entry !== lessonId) : [...current, lessonId];
+      localStorage.setItem(lessonKey, JSON.stringify(next));
+      syncLabel();
+    });
+    syncLabel();
+  </script>
+</BaseLayout>

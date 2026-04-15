@@ -1,0 +1,22 @@
+{
+  "sessions": {
+    "ses_270e483a7ffedkyZRjPXuszqhl": {
+      "lint": false,
+      "test": false,
+      "typecheck": false,
+      "build": true,
+      "security": false,
+      "updatedAt": "2026-04-15T04:45:54.141Z"
+    }
+  },
+  "worktrees": {
+    "/Users/diego/Codes/Learning/ai-soroban": {
+      "lint": false,
+      "test": false,
+      "typecheck": false,
+      "build": true,
+      "security": false,
+      "updatedAt": "2026-04-15T04:45:54.141Z"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+---
+import { getCollection } from 'astro:content';
+import PracticeClient from '../../components/PracticeClient.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const exercises = (await getCollection('exercises')).map((exercise) => ({
+  id: exercise.data.id,
+  slug: exercise.slug,
+  title: exercise.data.title,
+  level: exercise.data.level,
+  skill: exercise.data.skill,
+}));
+---
+
+<BaseLayout title="Practice Now | Soroban Dojo">
+  <PracticeClient exercises={exercises} />
+</BaseLayout>

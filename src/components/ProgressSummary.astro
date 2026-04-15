@@ -1,0 +1,93 @@
+<section class="panel">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Local progress</p>
+      <h2>Your dojo summary</h2>
+    </div>
+    <button class="button button-secondary" id="reset-progress">Reset progress</button>
+  </div>
+  <div class="stats-grid">
+    <article class="stat-card"><span id="completed-lessons">0</span><small>Lessons completed</small></article>
+    <article class="stat-card"><span id="attempted-exercises">0</span><small>Exercises attempted</small></article>
+    <article class="stat-card"><span id="review-items">0</span><small>Items to review</small></article>
+    <article class="stat-card"><span id="time-practiced">0m</span><small>Tracked practice time</small></article>
+    <article class="stat-card"><span id="finished-sessions">0</span><small>Sessions finished</small></article>
+    <article class="stat-card"><span id="best-score">0</span><small>Best saved score</small></article>
+  </div>
+  <p id="progress-note" class="muted">Your progress stays in this browser unless you clear it.</p>
+  <div id="recent-sessions" class="session-list"></div>
+</section>
+
+<script is:inline>
+  const lessonKey = 'soroban-dojo:completed-lessons';
+  const exerciseKey = 'soroban-dojo:exercise-states';
+  const timerKey = 'soroban-dojo:timer-history';
+  const sessionKey = 'soroban-dojo:practice-sessions';
+
+  const lessonData = (() => {
+    try {
+      return JSON.parse(localStorage.getItem(lessonKey) || '[]');
+    } catch {
+      return [];
+    }
+  })();
+  const exerciseData = (() => {
+    try {
+      return JSON.parse(localStorage.getItem(exerciseKey) || '{}');
+    } catch {
+      return {};
+    }
+  })();
+  const timerData = (() => {
+    try {
+      return JSON.parse(localStorage.getItem(timerKey) || '[]');
+    } catch {
+      return [];
+    }
+  })();
+  const sessionData = (() => {
+    try {
+      return JSON.parse(localStorage.getItem(sessionKey) || '[]');
+    } catch {
+      return [];
+    }
+  })();
+
+  const attempted = Object.values(exerciseData).filter(Boolean);
+  const reviewItems = Object.values(exerciseData).filter((entry) => entry?.status === 'needs-review');
+  const totalSeconds = timerData.reduce((sum, entry) => sum + (entry.seconds || ((entry.minutes || 0) * 60)), 0);
+  const totalMinutes = Math.round(totalSeconds / 60);
+  const finishedSessions = sessionData.filter((entry) => entry?.completed);
+  const bestScore = finishedSessions.reduce((best, entry) => Math.max(best, entry.finalScore || 0), 0);
+
+  document.getElementById('completed-lessons').textContent = String(lessonData.length);
+  document.getElementById('attempted-exercises').textContent = String(attempted.length);
+  document.getElementById('review-items').textContent = String(reviewItems.length);
+  document.getElementById('time-practiced').textContent = `${totalMinutes}m`;
+  document.getElementById('finished-sessions').textContent = String(finishedSessions.length);
+  document.getElementById('best-score').textContent = String(bestScore);
+
+  const recentSessions = document.getElementById('recent-sessions');
+  if (sessionData.length) {
+    recentSessions.innerHTML = '<p class="eyebrow">Recent sessions</p><h3>Saved dojo history</h3>';
+    sessionData.slice(0, 3).forEach((entry) => {
+      const card = document.createElement('article');
+      card.className = 'session-card';
+      const title = document.createElement('strong');
+      title.textContent = `${entry.type} · ${entry.level} · ${entry.id}`;
+      const meta = document.createElement('p');
+      meta.className = 'muted';
+      meta.textContent = entry.completed ? `Final score ${entry.finalScore}/100` : `Progress ${entry.currentIndex}/${entry.questions.length}`;
+      card.append(title, meta);
+      recentSessions.appendChild(card);
+    });
+  }
+
+  document.getElementById('reset-progress')?.addEventListener('click', () => {
+    localStorage.removeItem(lessonKey);
+    localStorage.removeItem(exerciseKey);
+    localStorage.removeItem(timerKey);
+    localStorage.removeItem(sessionKey);
+    window.location.reload();
+  });
+</script>

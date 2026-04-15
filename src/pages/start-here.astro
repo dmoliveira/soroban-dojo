@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="Start Here | Soroban Dojo">
+  <section class="panel content-prose">
+    <p class="eyebrow">Start here</p>
+    <h1>How to use the dojo</h1>
+    <p>Choose the path that fits your learner, start at a level that feels honest, and practice one concept at a time.</p>
+    <ol>
+      <li>Pick the Children or Adult path.</li>
+      <li>Read one short lesson.</li>
+      <li>Try the linked exercise before revealing the answer.</li>
+      <li>Mark whether you got it, almost got it, or need review.</li>
+      <li>Return tomorrow for another small session.</li>
+    </ol>
+    <div class="hero-actions">
+      <a class="button" href={`${base}paths/children`}>Children path</a>
+      <a class="button button-secondary" href={`${base}paths/adults`}>Adult path</a>
+    </div>
+  </section>
+</BaseLayout>

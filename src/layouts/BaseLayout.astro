@@ -1,0 +1,64 @@
+---
+import '../styles/global.css';
+import JapaneseLabel from '../components/JapaneseLabel.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Soroban Dojo on GitHub Pages' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.toString()} />
+    <link rel="icon" href={`${base}favicon.svg`} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="site-header">
+      <div class="shell topbar">
+        <a class="brand" href={base}>
+          <span class="brand-mark">道</span>
+          <span>
+            <strong>Soroban Dojo</strong>
+            <small>Small steps, steady hands · そろばん道場</small>
+          </span>
+        </a>
+        <nav class="nav">
+          <a href={`${base}start-here`}><JapaneseLabel english="Start" japanese="はじめ" /></a>
+          <a href={`${base}paths/children`}><JapaneseLabel english="Children" japanese="こども" /></a>
+          <a href={`${base}paths/adults`}><JapaneseLabel english="Adults" japanese="おとな" /></a>
+          <a href={`${base}levels`}><JapaneseLabel english="Levels" japanese="段階" /></a>
+          <a href={`${base}lessons`}><JapaneseLabel english="Lessons" japanese="稽古" /></a>
+          <a href={`${base}exercises`}><JapaneseLabel english="Exercises" japanese="練習" /></a>
+          <a href={`${base}practice`}><JapaneseLabel english="Practice" japanese="修練" /></a>
+          <a href={`${base}progress`}><JapaneseLabel english="Progress" japanese="歩み" /></a>
+          <a href={`${base}support`}><JapaneseLabel english="Support" japanese="支援" /></a>
+        </nav>
+      </div>
+    </header>
+    <main id="main-content" class="shell page-shell">
+      <slot />
+    </main>
+    <footer class="site-footer shell">
+      <div>
+        <p class="footer-title">Soroban Dojo</p>
+        <p class="muted">A calm, practical place to learn and practice Soroban from first beads to advanced drills.</p>
+      </div>
+      <div class="footer-links">
+        <a href={`${base}privacy`}>Privacy</a>
+        <a href={`${base}about`}>About</a>
+        <a href={`${base}support`}>Support</a>
+      </div>
+    </footer>
+  </body>
+</html>

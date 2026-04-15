@@ -1,0 +1,10 @@
+---
+interface Props {
+  english: string;
+  japanese: string;
+}
+
+const { english, japanese } = Astro.props;
+---
+
+<span class="jp-label"><span>{english}</span><small lang="ja">{japanese}</small></span>

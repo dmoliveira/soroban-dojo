@@ -1,0 +1,20 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  summary: string;
+}
+
+const { eyebrow, title, summary } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="hero panel">
+  <p class="eyebrow">{eyebrow}</p>
+  <h1>{title}</h1>
+  <p class="hero-summary">{summary}</p>
+  <div class="hero-actions">
+    <a class="button" href={`${base}start-here`}>Begin calmly</a>
+    <a class="button button-secondary" href={`${base}practice`}>Try one exercise</a>
+  </div>
+</section>
