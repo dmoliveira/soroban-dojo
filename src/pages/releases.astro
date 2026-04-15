@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const releases = [
+  {
+    version: '0.2.0',
+    title: 'Placement and intermediate practice expansion',
+    date: '2026-04-15',
+    notes: [
+      'Added a placement self-check with calm level recommendations.',
+      'Expanded curriculum into L3 and L4 with mixed-operation, multiplication, and division starter lessons.',
+      'Added printable worksheets and daily drill generator pages.',
+      'Added a GitHub Pages deployment workflow for main.',
+    ],
+  },
+  {
+    version: '0.1.0',
+    title: 'Initial Soroban Dojo foundation',
+    date: '2026-04-15',
+    notes: [
+      'Launched the Astro static Soroban learning site scaffold.',
+      'Added lessons, exercises, local progress tracking, practice sessions, and Japanese-inspired UI details.',
+      'Enabled answer reveal, scoring, history, and one-at-a-time guided practice.',
+    ],
+  },
+];
+---
+
+<BaseLayout title="Releases | Soroban Dojo">
+  <section class="panel content-prose">
+    <p class="eyebrow">Releases · 更新</p>
+    <h1>Release notes</h1>
+    <p>Track the dojo’s progress over time: new lessons, new drills, new review tools, and deployment milestones.</p>
+  </section>
+
+  <section class="session-list">
+    {releases.map((release) => (
+      <article class="panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Version {release.version}</p>
+            <h2>{release.title}</h2>
+          </div>
+          <span class="badge">{release.date}</span>
+        </div>
+        <ul>
+          {release.notes.map((note) => <li>{note}</li>)}
+        </ul>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

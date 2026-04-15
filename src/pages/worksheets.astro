@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const base = import.meta.env.BASE_URL;
+
+const printableSets = [
+  {
+    title: 'Foundations sheet',
+    level: 'L0',
+    prompts: ['Read 7 on one rod.', 'Show 24 on two rods.', 'Explain what the beam does.', 'Set 31 cleanly.'],
+  },
+  {
+    title: 'Beginner operations sheet',
+    level: 'L1',
+    prompts: ['2 + 3', '7 + 1', '8 - 2', '4 + 4'],
+  },
+  {
+    title: 'Intermediate drill sheet',
+    level: 'L3',
+    prompts: ['24 + 7 + 1', '36 - 12', '32 + 6 - 4', '41 - 18'],
+  },
+  {
+    title: 'Advanced pattern sheet',
+    level: 'L4',
+    prompts: ['3 × 4', '4 × 3', '12 ÷ 3', '12 ÷ 4'],
+  },
+];
+---
+
+<BaseLayout title="Printable Worksheets | Soroban Dojo">
+  <section class="panel content-prose no-print">
+    <p class="eyebrow">Printable worksheets · 印刷</p>
+    <h1>Print calm practice sheets</h1>
+    <p>Use these sheets for quiet desk practice, parent-guided review, or dojo-style repetition away from the screen.</p>
+    <div class="button-row">
+      <button class="button" onclick="window.print()">Print this page</button>
+      <a class="button button-secondary" href={`${base}practice`}>Return to practice</a>
+    </div>
+  </section>
+
+  <section class="card-grid worksheet-grid print-sheet">
+    {printableSets.map((set) => (
+      <article class="panel worksheet-card">
+        <p class="eyebrow">{set.level}</p>
+        <h2>{set.title}</h2>
+        <ol>
+          {set.prompts.map((prompt) => <li>{prompt}</li>)}
+        </ol>
+        <div class="worksheet-answer-lines">
+          {set.prompts.map(() => <div class="answer-line" />)}
+        </div>
+      </article>
+    ))}
+  </section>
+</BaseLayout>
