@@ -55,40 +55,45 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
           <option value="4-6">4–6 digits</option>
         </select>
       </label>
-      <label class="stack-sm">
-        <span>Sheet type</span>
-        <select id="worksheet-style" class="select">
-          <option value="practice">Practice</option>
-          <option value="speed">Speed</option>
-          <option value="review">Review</option>
-          <option value="exam">Exam</option>
-          <option value="teacher">Teacher key</option>
-        </select>
-      </label>
-      <label class="stack-sm">
-        <span>Orientation</span>
-        <select id="worksheet-orientation" class="select">
-          <option value="ledger" selected>Ledger rows</option>
-          <option value="vertical">Vertical columns</option>
-        </select>
-      </label>
-      <label class="stack-sm">
-        <span>Drills</span>
-        <select id="worksheet-count" class="select">
-          <option value="20">20</option>
-          <option value="40" selected>40</option>
-          <option value="60">60</option>
-          <option value="100">100</option>
-        </select>
-      </label>
-      <label class="stack-sm">
-        <span>Stopwatch</span>
-        <select id="worksheet-timer-mode" class="select">
-          <option value="off">Off</option>
-          <option value="on">On</option>
-        </select>
-      </label>
       </div>
+      <details class="worksheet-advanced-block">
+        <summary>Advanced options</summary>
+        <div class="worksheet-controls-grid worksheet-controls-grid-advanced">
+          <label class="stack-sm">
+            <span>Sheet type</span>
+            <select id="worksheet-style" class="select">
+              <option value="practice">Practice</option>
+              <option value="speed">Speed</option>
+              <option value="review">Review</option>
+              <option value="exam">Exam</option>
+              <option value="teacher">Teacher key</option>
+            </select>
+          </label>
+          <label class="stack-sm">
+            <span>Orientation</span>
+            <select id="worksheet-orientation" class="select">
+              <option value="ledger" selected>Ledger rows</option>
+              <option value="vertical">Vertical columns</option>
+            </select>
+          </label>
+          <label class="stack-sm">
+            <span>Drills</span>
+            <select id="worksheet-count" class="select">
+              <option value="20">20</option>
+              <option value="40" selected>40</option>
+              <option value="60">60</option>
+              <option value="100">100</option>
+            </select>
+          </label>
+          <label class="stack-sm">
+            <span>Stopwatch</span>
+            <select id="worksheet-timer-mode" class="select">
+              <option value="off">Off</option>
+              <option value="on">On</option>
+            </select>
+          </label>
+        </div>
+      </details>
     </div>
 
     <div class="button-row worksheet-action-row">
@@ -136,6 +141,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         <span>Drill</span>
         <span>Response</span>
         <span>Result</span>
+        <span>Actions</span>
       </div>
       <div id="worksheet-table" class="worksheet-table ledger-table"></div>
     </article>
@@ -388,6 +394,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
               ${renderVerticalPrompt(prompt)}
               <input class="input worksheet-input vertical-input" data-prompt="${prompt}" type="text" inputmode="numeric" placeholder="Write" />
               <small class="worksheet-feedback vertical-feedback"></small>
+              <div class="worksheet-row-actions"><button type="button" class="mini-action" data-row-action="check">Check</button><button type="button" class="mini-action" data-row-action="reveal">Reveal</button></div>
             `;
             col.appendChild(row);
           });
@@ -402,6 +409,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
             <span class="worksheet-prompt ledger-prompt">${prompt}</span>
             <input class="input worksheet-input ledger-input" data-prompt="${prompt}" type="text" inputmode="numeric" placeholder="Write" />
             <small class="worksheet-feedback ledger-feedback"></small>
+            <div class="worksheet-row-actions"><button type="button" class="mini-action" data-row-action="check">Check</button><button type="button" class="mini-action" data-row-action="reveal">Reveal</button></div>
           `;
           table.appendChild(row);
         });
@@ -458,6 +466,22 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       setMetric('worksheet-completion', `${completion}%`);
     };
 
+    const scoreSingleRow = (row, reveal = false) => {
+      const input = row.querySelector('.worksheet-input');
+      const feedback = row.querySelector('.worksheet-feedback');
+      if (!input || !feedback) return;
+      const expected = solvePrompt(input.dataset.prompt);
+      const value = input.value.trim();
+      if (!value) {
+        feedback.textContent = reveal ? `${expected}` : 'Write first';
+        feedback.className = `worksheet-feedback ${reveal ? 'revealed' : 'needs-work'}`;
+        return;
+      }
+      const isCorrect = Number(value) === expected;
+      feedback.textContent = reveal ? `${expected}` : (isCorrect ? '✓' : '○');
+      feedback.className = `worksheet-feedback ${reveal ? 'revealed' : isCorrect ? 'ok' : 'needs-work'}`;
+    };
+
     const syncTimer = () => {
       if (!worksheetTimerStartedAt) return;
       const seconds = Math.max(0, Math.round((Date.now() - worksheetTimerStartedAt) / 1000));
@@ -506,6 +530,13 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         autoAlignOrientation();
         renderSheet();
       });
+    });
+    table.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-row-action]');
+      if (!button) return;
+      const row = button.closest('.ledger-row, .vertical-drill-row');
+      if (!row) return;
+      scoreSingleRow(row, button.dataset.rowAction === 'reveal');
     });
     document.querySelectorAll('#worksheet-mode, #worksheet-level, #worksheet-family, #worksheet-band, #worksheet-style, #worksheet-orientation, #worksheet-count').forEach((node) => {
       node.addEventListener('change', renderSheet);
