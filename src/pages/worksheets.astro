@@ -121,13 +121,15 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       <article class="stat-card stat-card-soft"><span id="worksheet-completion">0%</span><small>Completion</small></article>
       <article class="stat-card stat-card-soft"><span id="worksheet-time">0s</span><small>Time</small></article>
     </div>
-    <div id="adaptive-note" class="subtle-panel no-print" hidden>
-      <strong>Adaptive recommendation</strong>
-      <p id="adaptive-note-copy" class="muted">This sheet is tuned to your recent weak areas stored in local progress.</p>
-    </div>
-    <div id="teacher-note" class="subtle-panel no-print" hidden>
-      <strong>Teacher view</strong>
-      <p class="muted">Use this mode to print answer keys or review drills aloud. Answers remain visible while blank student rows are left untouched.</p>
+    <div class="worksheet-note-strip">
+      <div id="adaptive-note" class="subtle-panel worksheet-note-panel no-print" hidden>
+        <strong>Adaptive recommendation</strong>
+        <p id="adaptive-note-copy" class="muted">This sheet is tuned to your recent weak areas stored in local progress.</p>
+      </div>
+      <div id="teacher-note" class="subtle-panel worksheet-note-panel no-print" hidden>
+        <strong>Teacher view</strong>
+        <p class="muted">Use this mode to print answer keys or review drills aloud. Answers remain visible while blank student rows are left untouched.</p>
+      </div>
     </div>
   </section>
 
