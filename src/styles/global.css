@@ -142,26 +142,33 @@ a { color: inherit; text-decoration: none; }
 .sheet-row { display: grid; grid-template-columns: 1.7fr 0.7fr; gap: 0.75rem; align-items: center; padding: 0.7rem 0; border-bottom: 1px dashed rgba(99,88,79,0.2); }
 .sheet-prompt { font-size: 0.98rem; }
 .sora-sheet-note { background: linear-gradient(180deg, rgba(234,211,204,0.35), rgba(255,255,255,0.58)); }
-.worksheet-controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.85rem; align-items: start; }
-.ledger-controls { background: rgba(255,255,255,0.32); padding: 0.85rem; border-radius: 16px; border: 1px solid rgba(99,88,79,0.12); }
+.worksheet-controls-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; align-items: start; }
+.ledger-controls { background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(248,242,233,0.92)); padding: 0.8rem; border-radius: 16px; border: 1px solid rgba(99,88,79,0.12); }
+.worksheet-controls-shell { box-shadow: inset 0 1px 0 rgba(255,255,255,0.55); }
+.worksheet-controls-grid-main > label,
+.worksheet-controls-grid-main > fieldset { background: rgba(255,255,255,0.42); border: 1px solid rgba(99,88,79,0.1); border-radius: 14px; padding: 0.7rem; }
+.worksheet-controls-grid-main > label span,
+.worksheet-controls-grid-main > fieldset legend { font-size: 0.84rem; font-weight: 700; color: var(--muted); letter-spacing: 0.04em; }
 .worksheet-operation-group { border: 0; padding: 0; margin: 0; grid-column: 1 / -1; }
-.worksheet-operation-group legend { font-size: 0.95rem; margin-bottom: 0.5rem; }
-.operation-chip-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
-.operation-chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.75rem; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.6); cursor: pointer; }
+.worksheet-operation-group legend { margin-bottom: 0.45rem; }
+.operation-chip-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.operation-chip { display: inline-flex; align-items: center; gap: 0.28rem; padding: 0.32rem 0.6rem; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.78); cursor: pointer; font-size: 0.88rem; line-height: 1.1; }
+.worksheet-action-row { gap: 0.55rem; }
+.worksheet-action-row .button { padding: 0.62rem 0.9rem; font-size: 0.94rem; }
 .operation-chip input { accent-color: var(--accent); }
 .worksheet-board { display: grid; gap: 1rem; }
 .worksheet-panel { display: grid; gap: 1rem; }
 .ledger-panel { background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(241,236,227,0.92)); }
 .worksheet-table { display: grid; gap: 0; }
 .vertical-table { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1rem; align-items: start; }
-.vertical-drill-column { display: grid; gap: 0.35rem; border-left: 1px solid rgba(99,88,79,0.14); padding-left: 0.6rem; }
-.vertical-drill-row { display: grid; gap: 0.35rem; padding: 0.5rem 0; border-bottom: 1px dashed rgba(99,88,79,0.12); justify-items: end; }
+.vertical-drill-column { display: grid; gap: 0.25rem; border-left: 1px solid rgba(99,88,79,0.14); padding-left: 0.55rem; }
+.vertical-drill-row { display: grid; gap: 0.25rem; padding: 0.4rem 0; border-bottom: 1px dashed rgba(99,88,79,0.12); justify-items: end; }
 .vertical-input { border-radius: 8px; padding: 0.45rem 0.55rem; text-align: right; width: 88px; }
 .vertical-feedback { min-height: 0.9rem; text-align: right; width: 88px; }
-.v-arith-block { display: grid; gap: 0.12rem; justify-items: end; font-variant-numeric: tabular-nums; }
+.v-arith-block { display: grid; gap: 0.08rem; justify-items: end; font-variant-numeric: tabular-nums; padding: 0.2rem 0.1rem; background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(250,246,239,0.65)); border-radius: 8px; }
 .v-arith-row { display: grid; grid-template-columns: 12px auto; gap: 0.3rem; align-items: center; min-width: 72px; }
 .v-arith-op { color: var(--muted); text-align: center; }
-.v-arith-value { font-weight: 700; letter-spacing: 0.04em; }
+.v-arith-value { font-weight: 700; letter-spacing: 0.04em; min-width: 3.5ch; text-align: right; }
 .v-arith-line { width: 100%; border-bottom: 2px solid rgba(30,26,23,0.45); margin-top: 0.15rem; }
 .ledger-head,
 .ledger-row { display: grid; grid-template-columns: 64px 1.6fr 120px 92px; gap: 0.75rem; align-items: center; }
@@ -170,10 +177,10 @@ a { color: inherit; text-decoration: none; }
 .compact-row { gap: 0.5rem; }
 .worksheet-cell { display: grid; gap: 0.45rem; padding: 0.85rem; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,0.42); }
 .compact-cell { padding: 0.6rem; gap: 0.35rem; }
-.ledger-row { padding: 0.55rem 0; border-bottom: 1px solid rgba(99,88,79,0.12); }
+.ledger-row { padding: 0.42rem 0; border-bottom: 1px solid rgba(99,88,79,0.12); }
 .ledger-no { color: var(--muted); font-variant-numeric: tabular-nums; }
 .ledger-prompt { font-weight: 600; }
-.ledger-input { border-radius: 10px; padding: 0.55rem 0.7rem; text-align: right; background: rgba(255,255,255,0.72); }
+.ledger-input { border-radius: 10px; padding: 0.45rem 0.6rem; text-align: right; background: rgba(255,255,255,0.8); }
 .ledger-feedback { text-align: right; min-height: 1rem; }
 .worksheet-prompt { font-weight: 700; }
 .worksheet-input { min-width: 0; }
@@ -183,7 +190,7 @@ a { color: inherit; text-decoration: none; }
 .worksheet-feedback.revealed { color: var(--ink); }
 .worksheet-scorebar { display: flex; justify-content: space-between; align-items: center; }
 .worksheet-scorebar strong { letter-spacing: 0.04em; }
-.worksheet-score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; }
+.worksheet-score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.6rem; }
 .worksheet-scorebar { position: sticky; top: 5.75rem; z-index: 5; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(241,236,227,0.95)); }
 .ledger-panel.teacher-mode { background: linear-gradient(180deg, rgba(250,244,231,0.96), rgba(241,236,227,0.96)); }
 .teacher-mode .ledger-feedback,
