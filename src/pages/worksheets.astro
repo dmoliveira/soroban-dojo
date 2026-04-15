@@ -200,6 +200,18 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       return null;
     };
 
+    const renderVerticalPrompt = (prompt) => {
+      const tokens = prompt.split(' ');
+      const rows = [];
+      for (let i = 0; i < tokens.length; i += 2) {
+        const value = tokens[i];
+        const operator = i === 0 ? '' : tokens[i - 1];
+        rows.push(`<div class="v-arith-row"><span class="v-arith-op">${operator}</span><span class="v-arith-value">${value}</span></div>`);
+      }
+      rows.push('<div class="v-arith-line"></div>');
+      return `<div class="v-arith-block">${rows.join('')}</div>`;
+    };
+
     const parseBand = (band) => {
       if (band.includes('-')) {
         const [min, max] = band.split('-').map(Number);
@@ -360,7 +372,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
             row.className = 'vertical-drill-row';
             row.innerHTML = `
               <span class="ledger-no">${absoluteIndex + 1}</span>
-              <span class="worksheet-prompt vertical-prompt">${prompt}</span>
+              ${renderVerticalPrompt(prompt)}
               <input class="input worksheet-input vertical-input" data-prompt="${prompt}" type="text" inputmode="numeric" placeholder="Write" />
               <small class="worksheet-feedback vertical-feedback"></small>
             `;
