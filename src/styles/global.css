@@ -200,10 +200,13 @@ a { color: inherit; text-decoration: none; }
 .worksheet-feedback.ok { color: #2b6e45; }
 .worksheet-feedback.needs-work { color: var(--accent); }
 .worksheet-feedback.revealed { color: var(--ink); }
-.worksheet-scorebar { display: flex; justify-content: space-between; align-items: center; }
+.worksheet-scorebar { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; border-radius: 12px; }
 .worksheet-scorebar strong { letter-spacing: 0.04em; }
-.worksheet-score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.6rem; }
+.worksheet-score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 0.45rem; }
 .worksheet-scorebar { position: sticky; top: 5.75rem; z-index: 5; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(241,236,227,0.95)); }
+.worksheet-score-grid .stat-card { padding: 0.7rem 0.75rem; border-radius: 12px; }
+.worksheet-score-grid .stat-card span { font-size: 1.6rem; }
+.worksheet-score-grid .stat-card small { display: block; margin-top: 0.15rem; }
 .ledger-panel.teacher-mode { background: linear-gradient(180deg, rgba(250,244,231,0.96), rgba(241,236,227,0.96)); }
 .teacher-mode .ledger-feedback,
 .teacher-mode .vertical-feedback { font-weight: 700; }
