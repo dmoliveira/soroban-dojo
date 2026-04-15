@@ -133,14 +133,3 @@ summary:focus-visible {
   .shell { width: 100%; margin: 0; padding: 0; }
   .panel { box-shadow: none; border: 1px solid #999; }
 }
-@media print {
-  .site-header,
-  .site-footer,
-  .no-print,
-  .button,
-  .nav { display: none !important; }
-  body { background: #fff; }
-  .page-shell,
-  .shell { width: 100%; margin: 0; padding: 0; }
-  .panel { box-shadow: none; border: 1px solid #999; }
-}
