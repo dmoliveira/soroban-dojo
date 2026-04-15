@@ -124,12 +124,13 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
           <p class="eyebrow">Current session</p>
           <h2 id="session-title">No session selected yet</h2>
         </div>
-        <div class="stack-sm small muted">
-          <div id="session-id">Session ID —</div>
-          <div id="session-progress">Question 0 / 0</div>
-          <div id="session-score">Score —</div>
-          <div id="session-timer">Timer off</div>
-        </div>
+      <div class="stack-sm small muted">
+        <div id="session-id">Session ID —</div>
+        <div id="session-progress">Question 0 / 0</div>
+        <div id="session-score">Score —</div>
+        <div id="session-timer">Timer off</div>
+        <div id="session-adaptive-note">Adaptive note —</div>
+      </div>
       </div>
 
       <div id="visual-mount" class="subtle-panel visual-stage" hidden></div>
@@ -274,6 +275,14 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       else acc.arithmetic += 1;
       return acc;
     }, { arithmetic: 0, complements: 0, multiplication: 0, mental: 0 });
+  };
+
+  const describeAdaptivePractice = (level) => {
+    const weak = readWeakAreas();
+    if (level === 'L5' || weak.mental >= weak.arithmetic) return 'Adaptive focus: mental / anzan recovery';
+    if (weak.multiplication > weak.arithmetic && level === 'L4') return 'Adaptive focus: multiplication / division repair';
+    if (weak.complements > weak.arithmetic && level === 'L2') return 'Adaptive focus: complements and balancing';
+    return 'Adaptive focus: arithmetic rhythm and accuracy';
   };
 
   const makeId = () => `dojo-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -567,6 +576,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     const progress = byId('session-progress');
     const score = byId('session-score');
     const timer = byId('session-timer');
+    const adaptiveNote = byId('session-adaptive-note');
     const questionTitle = byId('question-title');
     const questionPrompt = byId('question-prompt');
     const answerInput = byId('answer-input');
@@ -585,6 +595,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       progress.textContent = 'Question 0 / 0';
       score.textContent = 'Score —';
       timer.textContent = 'Timer off';
+      adaptiveNote.textContent = 'Adaptive note —';
       questionTitle.textContent = 'Choose a session to begin.';
       questionPrompt.textContent = 'Curated lists follow the lessons; generated lists create replayable arithmetic practice.';
       answerInput.value = '';
@@ -603,6 +614,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     progress.textContent = `Question ${currentSession.currentIndex + 1} / ${currentSession.questions.length}`;
     score.textContent = `Score ${(currentSession.completed ? currentSession.finalScore : computeSessionScore(currentSession)) || 0}/100`;
     timer.textContent = currentSession.timerEnabled ? 'Timer on' : 'Timer off';
+    adaptiveNote.textContent = currentSession.questionStyle === 'adaptive' ? describeAdaptivePractice(currentSession.level) : 'Adaptive note —';
     questionTitle.textContent = currentSession.completed ? 'Session completed' : question.title;
     questionPrompt.textContent = currentSession.completed
       ? 'Review your score, replay the same list, or start a fresh session with a new ID.'
