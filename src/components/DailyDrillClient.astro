@@ -1,0 +1,90 @@
+<section class="panel">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Daily drill pack · 日々の修練</p>
+      <h1>Generate today’s focused set</h1>
+    </div>
+    <span class="badge">Fresh each day</span>
+  </div>
+  <p class="muted">This pack changes by day and level so learners can return to a fresh but stable set. Print it or solve it on screen.</p>
+
+  <div class="practice-grid">
+    <div class="stack-sm">
+      <label class="stack-sm">
+        <span>Level · 段階</span>
+        <select id="daily-level" class="select">
+          <option value="L0">L0 Foundations</option>
+          <option value="L1">L1 Beginner</option>
+          <option value="L2">L2 Complements</option>
+          <option value="L3">L3 Mixed fluency</option>
+          <option value="L4">L4 Multiplication & division</option>
+        </select>
+      </label>
+      <div class="button-row">
+        <button class="button" id="generate-daily-drill">Generate pack</button>
+        <button class="button button-secondary" id="print-daily-drill">Print pack</button>
+      </div>
+    </div>
+    <div class="subtle-panel">
+      <p class="eyebrow">Pack identity</p>
+      <div id="daily-pack-id" class="muted">Daily pack ID will appear here.</div>
+    </div>
+  </div>
+
+  <ol id="daily-drill-list" class="list-clean"></ol>
+</section>
+
+<script is:inline>
+  const banks = {
+    L0: [
+      () => { const a = Math.floor(Math.random() * 5); const b = Math.floor(Math.random() * 5); return { prompt: `Read ${a} tens and ${b} ones.`, answer: a * 10 + b }; },
+      () => { const value = Math.floor(Math.random() * 9); return { prompt: `Show the digit ${value} on one rod.`, answer: value }; },
+    ],
+    L1: [
+      () => { const a = Math.floor(Math.random() * 8) + 1; const b = Math.floor(Math.random() * (9 - a)) + 1; return { prompt: `${a} + ${b}`, answer: a + b }; },
+      () => { const a = Math.floor(Math.random() * 8) + 2; const b = Math.floor(Math.random() * (a - 1)) + 1; return { prompt: `${a} - ${b}`, answer: a - b }; },
+    ],
+    L2: [
+      () => { const a = Math.floor(Math.random() * 8) + 1; return { prompt: `What completes ${a} to 10?`, answer: 10 - a }; },
+      () => { const a = Math.floor(Math.random() * 4) + 1; return { prompt: `What completes ${a} to 5?`, answer: 5 - a }; },
+    ],
+    L3: [
+      () => { const a = 20 + Math.floor(Math.random() * 20); const b = Math.floor(Math.random() * 9) + 1; const c = Math.floor(Math.random() * 4) + 1; return { prompt: `${a} + ${b} - ${c}`, answer: a + b - c }; },
+      () => { const a = 30 + Math.floor(Math.random() * 20); const b = 10 + Math.floor(Math.random() * 9); return { prompt: `${a} - ${b}`, answer: a - b }; },
+    ],
+    L4: [
+      () => { const a = Math.floor(Math.random() * 4) + 2; const b = Math.floor(Math.random() * 4) + 2; return { prompt: `${a} × ${b}`, answer: a * b }; },
+      () => { const divisor = Math.floor(Math.random() * 3) + 2; const quotient = Math.floor(Math.random() * 4) + 2; return { prompt: `${divisor * quotient} ÷ ${divisor}`, answer: quotient }; },
+    ],
+  };
+
+  const byId = (id) => document.getElementById(id);
+  const makeSeed = (level) => `${level}-${new Date().toISOString().slice(0, 10)}`;
+
+  const renderPack = () => {
+    const level = byId('daily-level').value;
+    const seed = makeSeed(level);
+    byId('daily-pack-id').textContent = `Pack ${seed}`;
+    const list = byId('daily-drill-list');
+    list.replaceChildren();
+    Array.from({ length: 8 }, (_, index) => {
+      const itemFactory = banks[level][index % banks[level].length];
+      const item = itemFactory();
+      const li = document.createElement('li');
+      const strong = document.createElement('strong');
+      strong.textContent = `${index + 1}. ${item.prompt}`;
+      const answer = document.createElement('div');
+      answer.className = 'muted small';
+      answer.textContent = `Answer: ${item.answer}`;
+      li.append(strong, answer);
+      list.appendChild(li);
+    });
+  };
+
+  byId('generate-daily-drill')?.addEventListener('click', renderPack);
+  byId('print-daily-drill')?.addEventListener('click', () => {
+    if (!byId('daily-drill-list').children.length) renderPack();
+    window.print();
+  });
+  renderPack();
+</script>
