@@ -231,6 +231,7 @@ a { color: inherit; text-decoration: none; }
 .worksheet-note-panel p { margin: 0.25rem 0 0; font-size: 0.92rem; }
 .lesson-next-panel { margin: 1.2rem 0; background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(248,242,233,0.85)); }
 .lesson-summary-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 1rem; margin: 0.4rem 0 1rem; }
+.lesson-flow-strip { margin: 0.45rem 0 0.6rem; }
 .lesson-summary-panel p { margin: 0; }
 .lesson-summary-panel ul { margin: 0; padding-left: 1.15rem; }
 .exercise-interaction-panel { margin-top: 1rem; background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(248,242,233,0.74)); }
