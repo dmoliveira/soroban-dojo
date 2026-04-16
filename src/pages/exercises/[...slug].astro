@@ -46,6 +46,10 @@ const { Content } = await render(exercise);
         <button class="button button-secondary" id="reveal-answer">Reveal answer</button>
         <button class="button button-secondary" id="reveal-method">Reveal method</button>
       </div>
+      <div class="exercise-state-strip">
+        <div class="exercise-state-card"><span id="exercise-state-response">—</span><small>Response</small></div>
+        <div class="exercise-state-card"><span id="exercise-state-status">Not checked</span><small>Status</small></div>
+      </div>
       <div id="exercise-feedback" class="reveal-panel" hidden role="status" aria-live="polite"></div>
       <div id="exercise-method" class="reveal-panel" hidden></div>
     </section>
@@ -55,6 +59,8 @@ const { Content } = await render(exercise);
     const responseInput = document.getElementById('exercise-response');
     const feedback = document.getElementById('exercise-feedback');
     const method = document.getElementById('exercise-method');
+    const responseState = document.getElementById('exercise-state-response');
+    const statusState = document.getElementById('exercise-state-status');
 
     const normalizeNumber = (value) => {
       const parsed = Number(value.trim());
@@ -66,6 +72,8 @@ const { Content } = await render(exercise);
       if (!value) {
         feedback.hidden = false;
         feedback.textContent = 'Write your response first, or choose to reveal the answer or method.';
+        responseState.textContent = 'Empty';
+        statusState.textContent = 'Waiting';
         return;
       }
       const expected = normalizeNumber(answer);
@@ -73,21 +81,26 @@ const { Content } = await render(exercise);
       const correct = expected !== null && actual === expected;
       feedback.hidden = false;
       feedback.textContent = correct ? 'Correct. Your response matches the answer.' : 'Not correct yet. Revise your response, ask for a hint, or reveal the answer.';
+      responseState.textContent = value;
+      statusState.textContent = correct ? 'Correct' : 'Try again';
     });
 
     document.getElementById('hint-exercise')?.addEventListener('click', () => {
       feedback.hidden = false;
       feedback.textContent = `Hint: ${hint}`;
+      statusState.textContent = 'Hint shown';
     });
 
     document.getElementById('reveal-answer')?.addEventListener('click', () => {
       feedback.hidden = false;
       feedback.textContent = `Answer: ${answer}`;
+      statusState.textContent = 'Answer shown';
     });
 
     document.getElementById('reveal-method')?.addEventListener('click', () => {
       method.hidden = false;
       method.textContent = explanation;
+      statusState.textContent = 'Method shown';
     });
   </script>
 </BaseLayout>
