@@ -251,6 +251,23 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
   let timerInterval = null;
   let questionStartedAt = null;
   let activeTimerKey = null;
+  const audioWindow = typeof window !== 'undefined' ? /** @type {any} */ (window) : null;
+  const AudioContextCtor = audioWindow
+    ? audioWindow.AudioContext || (audioWindow).webkitAudioContext || null
+    : null;
+  const audioCtx = AudioContextCtor ? new AudioContextCtor() : null;
+  const playTone = (type) => {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = type === 'success' ? 880 : 220;
+    gain.gain.value = 0.03;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.12);
+  };
 
   const curatedBank = [
     { level: 'L0', title: 'Add 1 and 2', prompt: 'Start from 1. Add 2. What is the final value?', answer: 3, steps: ['Start at 1.', 'Add 2.', '1 + 2 = 3.'], visualValue: 3 },
@@ -854,6 +871,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     const correct = input !== '' && !Number.isNaN(numericInput) && numericInput === question.answer;
     updateCurrentResponse({ input, verified: true, correct });
     feedback.hidden = false;
+    playTone(correct ? 'success' : 'error');
     feedback.textContent = correct ? 'Correct. Your response matches the answer. You may continue or reveal the method to study it.' : 'Not correct yet. Revise your response, or reveal the answer or the method.';
 
     if (currentSession.checkMode === 'final' || currentSession.checkMode === 'steps') {
@@ -864,6 +882,11 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       updateCurrentResponse({ revealedSteps: true });
     }
     renderSession();
+  });
+  byId('answer-input')?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    byId('verify-answer')?.click();
   });
 
   byId('reveal-final')?.addEventListener('click', () => {
@@ -920,6 +943,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       if (correct) correctCount += 1;
     });
     currentSession.finalScore = Math.round((correctCount / currentSession.questions.length) * 100);
+    playTone(correctCount === currentSession.questions.length ? 'success' : 'error');
     persistCurrent();
     const feedback = byId('feedback-panel');
     feedback.hidden = false;

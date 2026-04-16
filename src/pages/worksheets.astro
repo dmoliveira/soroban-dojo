@@ -240,6 +240,23 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     let worksheetTimerStartedAt = null;
     let worksheetTimerInterval = null;
     let celebrationTimeout = null;
+    const audioWindow = typeof window !== 'undefined' ? /** @type {any} */ (window) : null;
+    const AudioContextCtor = audioWindow
+      ? audioWindow.AudioContext || (audioWindow).webkitAudioContext || null
+      : null;
+    const audioCtx = AudioContextCtor ? new AudioContextCtor() : null;
+    const playTone = (type) => {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = type === 'success' ? 880 : 220;
+      gain.gain.value = 0.03;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    };
     const setPrintMode = () => {
       document.documentElement.dataset.worksheetPrintMode = byId('worksheet-print-mode')?.value || 'student';
     };
@@ -521,6 +538,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         answered += 1;
         const isCorrect = Number(value) === expected;
         if (isCorrect) correct += 1;
+        playTone(reveal ? 'success' : isCorrect ? 'success' : 'error');
         feedback.textContent = reveal ? `${expected}` : (isCorrect ? '✓' : '○');
         feedback.className = `worksheet-feedback ledger-feedback ${reveal ? 'revealed' : isCorrect ? 'ok' : 'needs-work'}`;
         row?.classList.remove('row-ok', 'row-needs-work', 'row-revealed');
@@ -570,6 +588,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         return;
       }
       const isCorrect = Number(value) === expected;
+      playTone(reveal ? 'success' : isCorrect ? 'success' : 'error');
       feedback.textContent = reveal ? `${expected}` : (isCorrect ? '✓' : '○');
       feedback.className = `worksheet-feedback ${reveal ? 'revealed' : isCorrect ? 'ok' : 'needs-work'}`;
       row.classList.remove('row-ok', 'row-needs-work', 'row-revealed');
@@ -645,6 +664,15 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       const row = button.closest('.ledger-row, .vertical-drill-row');
       if (!row) return;
       scoreSingleRow(row, button.dataset.rowAction === 'reveal');
+    });
+    table.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      const input = event.target.closest('.worksheet-input');
+      if (!input) return;
+      event.preventDefault();
+      const row = input.closest('.ledger-row, .vertical-drill-row');
+      if (!row) return;
+      scoreSingleRow(row, false);
     });
     document.querySelectorAll('#worksheet-mode, #worksheet-level, #worksheet-family, #worksheet-band, #worksheet-style, #worksheet-orientation, #worksheet-count, #worksheet-print-mode').forEach((node) => {
       node.addEventListener('change', renderSheet);

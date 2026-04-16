@@ -75,6 +75,24 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     const method = document.getElementById('exercise-method');
     const responseState = document.getElementById('exercise-state-response');
     const statusState = document.getElementById('exercise-state-status');
+    const audioWindow = typeof window !== 'undefined' ? /** @type {any} */ (window) : null;
+    const AudioContextCtor = audioWindow
+      ? audioWindow.AudioContext || (audioWindow).webkitAudioContext || null
+      : null;
+    const audioCtx = AudioContextCtor ? new AudioContextCtor() : null;
+
+    const playTone = (type) => {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = type === 'success' ? 880 : 220;
+      gain.gain.value = 0.03;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    };
 
     const normalizeNumber = (value) => {
       const parsed = Number(value.trim());
@@ -94,6 +112,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       const actual = normalizeNumber(value);
       const correct = expected !== null && actual === expected;
       feedback.hidden = false;
+      playTone(correct ? 'success' : 'error');
       feedback.textContent = correct ? 'Correct. Your response matches the answer.' : 'Not correct yet. Revise your response, ask for a hint, or reveal the answer.';
       responseState.textContent = value;
       statusState.textContent = correct ? 'Correct' : 'Try again';
@@ -107,6 +126,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 
     document.getElementById('reveal-answer')?.addEventListener('click', () => {
       feedback.hidden = false;
+      playTone('success');
       feedback.textContent = `Answer: ${answer}`;
       statusState.textContent = 'Answer shown';
     });
@@ -115,6 +135,11 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       method.hidden = false;
       method.textContent = explanation;
       statusState.textContent = 'Method shown';
+    });
+    responseInput?.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      document.getElementById('verify-exercise')?.click();
     });
   </script>
 </BaseLayout>
