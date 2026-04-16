@@ -277,6 +277,45 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     }, { arithmetic: 0, complements: 0, multiplication: 0, mental: 0 });
   };
 
+  const applyPracticeLevelDefaults = (level) => {
+    const format = byId('session-format');
+    const length = byId('session-length');
+    const checkMode = byId('check-mode');
+    const questionStyle = byId('question-style');
+    if (!format || !length || !checkMode || !questionStyle) return;
+    if (level === 'L0') {
+      format.value = 'single';
+      length.value = '5';
+      checkMode.value = 'final';
+      questionStyle.value = 'visual';
+    } else if (level === 'L1') {
+      format.value = 'single';
+      length.value = '10';
+      checkMode.value = 'final';
+      questionStyle.value = 'mixed';
+    } else if (level === 'L2') {
+      format.value = 'single';
+      length.value = '10';
+      checkMode.value = 'steps';
+      questionStyle.value = 'mixed';
+    } else if (level === 'L3') {
+      format.value = 'sheet';
+      length.value = '10';
+      checkMode.value = 'verify';
+      questionStyle.value = 'mixed';
+    } else if (level === 'L4') {
+      format.value = 'sheet';
+      length.value = '15';
+      checkMode.value = 'verify';
+      questionStyle.value = 'mixed';
+    } else {
+      format.value = 'single';
+      length.value = '10';
+      checkMode.value = 'steps';
+      questionStyle.value = 'mental';
+    }
+  };
+
   const describeAdaptivePractice = (level) => {
     const weak = readWeakAreas();
     if (level === 'L5' || weak.mental >= weak.arithmetic) return 'Adaptive focus: mental / anzan recovery';
@@ -733,6 +772,10 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     renderSession();
   });
 
+  byId('session-level')?.addEventListener('change', (event) => {
+    applyPracticeLevelDefaults(event.target.value);
+  });
+
   byId('resume-by-id')?.addEventListener('click', () => {
     stopTimer();
     const requestedId = byId('session-id-input').value.trim();
@@ -860,5 +903,6 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
   byId('print-sheet')?.addEventListener('click', () => window.print());
 
   renderHistory();
+  applyPracticeLevelDefaults(byId('session-level')?.value || 'L0');
   renderSession();
 </script>

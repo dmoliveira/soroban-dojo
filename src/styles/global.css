@@ -250,4 +250,12 @@ summary:focus-visible {
   .page-shell,
   .shell { width: 100%; margin: 0; padding: 0; }
   .panel { box-shadow: none; border: 1px solid #999; }
+  :root[data-worksheet-print-mode="student"] .worksheet-feedback,
+  :root[data-worksheet-print-mode="student"] .worksheet-row-actions,
+  :root[data-worksheet-print-mode="student"] .ledger-head span:nth-child(4),
+  :root[data-worksheet-print-mode="student"] .ledger-head span:nth-child(5) { display: none !important; }
+  :root[data-worksheet-print-mode="student"] .ledger-row,
+  :root[data-worksheet-print-mode="student"] .ledger-head { grid-template-columns: 52px 1fr 92px !important; }
+  :root[data-worksheet-print-mode="answer-key"] .worksheet-input { display: none !important; }
+  :root[data-worksheet-print-mode="answer-key"] .worksheet-feedback { color: #111 !important; font-weight: 700; }
 }

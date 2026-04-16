@@ -100,6 +100,13 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
               <option value="on">On</option>
             </select>
           </label>
+          <label class="stack-sm">
+            <span>Print mode</span>
+            <select id="worksheet-print-mode" class="select">
+              <option value="student">Student sheet</option>
+              <option value="answer-key">Answer key</option>
+            </select>
+          </label>
         </div>
       </details>
     </div>
@@ -113,7 +120,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       <div class="button-row worksheet-action-row worksheet-action-row-secondary">
         <button class="button button-secondary" id="teacher-key">Teacher key</button>
         <button class="button button-secondary" id="worksheet-timer-toggle">Start timer</button>
-        <button class="button button-secondary" onclick="window.print()">Print sheet</button>
+        <button class="button button-secondary" id="print-worksheet">Print sheet</button>
         <a class="button button-secondary" href={`${base}practice`}>Return to practice</a>
       </div>
     </div>
@@ -214,6 +221,9 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     const exerciseStateKey = 'soroban-dojo:exercise-states';
     let worksheetTimerStartedAt = null;
     let worksheetTimerInterval = null;
+    const setPrintMode = () => {
+      document.documentElement.dataset.worksheetPrintMode = byId('worksheet-print-mode')?.value || 'student';
+    };
 
     const selectedFamilies = () => Array.from(document.querySelectorAll('input[name="worksheet-family"]:checked')).map((node) => node.value);
     const setMetric = (id, value) => { byId(id).textContent = String(value); };
@@ -573,8 +583,19 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     byId('reveal-worksheet')?.addEventListener('click', () => scoreSheet(true));
     byId('teacher-key')?.addEventListener('click', () => {
       byId('worksheet-style').value = 'teacher';
+      byId('worksheet-print-mode').value = 'answer-key';
+      setPrintMode();
       renderSheet();
       scoreSheet(true);
+    });
+    byId('print-worksheet')?.addEventListener('click', () => {
+      setPrintMode();
+      if (byId('worksheet-print-mode').value === 'answer-key') {
+        byId('worksheet-style').value = 'teacher';
+        renderSheet();
+        scoreSheet(true);
+      }
+      window.print();
     });
     document.querySelectorAll('input[name="worksheet-family"]').forEach((node) => {
       node.addEventListener('change', () => {
@@ -592,10 +613,11 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       if (!row) return;
       scoreSingleRow(row, button.dataset.rowAction === 'reveal');
     });
-    document.querySelectorAll('#worksheet-mode, #worksheet-level, #worksheet-family, #worksheet-band, #worksheet-style, #worksheet-orientation, #worksheet-count').forEach((node) => {
+    document.querySelectorAll('#worksheet-mode, #worksheet-level, #worksheet-family, #worksheet-band, #worksheet-style, #worksheet-orientation, #worksheet-count, #worksheet-print-mode').forEach((node) => {
       node.addEventListener('change', renderSheet);
     });
     applyLevelDefaults();
+    setPrintMode();
     setMetric('worksheet-time', '0s');
     renderSheet();
   </script>
