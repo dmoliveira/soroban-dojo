@@ -41,6 +41,13 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         <p>Continue where you stopped, compare scores, or replay a past list with a fresh answer sheet.</p>
       </article>
     </div>
+    <div class="practice-preset-row">
+      <button class="button button-secondary practice-preset" data-preset="warmup">Warm-up</button>
+      <button class="button button-secondary practice-preset" data-preset="practice">Practice</button>
+      <button class="button button-secondary practice-preset" data-preset="review">Review</button>
+      <button class="button button-secondary practice-preset" data-preset="speed">Speed</button>
+      <button class="button button-secondary practice-preset" data-preset="mental">Mental</button>
+    </div>
     <div class="practice-grid">
       <div class="stack-sm">
         <label class="stack-sm">
@@ -114,6 +121,10 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         </label>
         <button class="button button-secondary" id="resume-by-id">Open saved ID</button>
       </div>
+    </div>
+    <div class="subtle-panel practice-current-setup">
+      <strong>Current setup</strong>
+      <span id="practice-current-setup-copy" class="muted small">single · curated · L0 · 10 questions · mixed</span>
     </div>
   </section>
 
@@ -443,6 +454,33 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
   const buildGeneratedQuestions = (level, length, sessionId, questionStyle) => {
     const rng = createRng(sessionId);
     return Array.from({ length }, (_, index) => buildGeneratedQuestion(level, index, rng, questionStyle));
+  };
+
+  const presets = {
+    warmup: { format: 'single', type: 'curated', level: 'L0', length: '5', checkMode: 'final', timerMode: 'off', questionStyle: 'visual' },
+    practice: { format: 'single', type: 'generated', level: 'L2', length: '10', checkMode: 'verify', timerMode: 'off', questionStyle: 'mixed' },
+    review: { format: 'sheet', type: 'generated', level: 'L2', length: '10', checkMode: 'steps', timerMode: 'off', questionStyle: 'adaptive' },
+    speed: { format: 'single', type: 'generated', level: 'L3', length: '20', checkMode: 'verify', timerMode: 'on', questionStyle: 'mixed' },
+    mental: { format: 'single', type: 'generated', level: 'L5', length: '10', checkMode: 'steps', timerMode: 'off', questionStyle: 'mental' },
+  };
+
+  const syncPracticeSetupCopy = () => {
+    const target = byId('practice-current-setup-copy');
+    if (!target) return;
+    target.textContent = `${byId('session-format').value} · ${byId('session-type').value} · ${byId('session-level').value} · ${byId('session-length').value} questions · ${byId('question-style').value}`;
+  };
+
+  const applyPreset = (key) => {
+    const preset = presets[key];
+    if (!preset) return;
+    byId('session-format').value = preset.format;
+    byId('session-type').value = preset.type;
+    byId('session-level').value = preset.level;
+    byId('session-length').value = preset.length;
+    byId('check-mode').value = preset.checkMode;
+    byId('timer-mode').value = preset.timerMode;
+    byId('question-style').value = preset.questionStyle;
+    syncPracticeSetupCopy();
   };
 
   const createSession = ({ type, level, length, checkMode, timerEnabled, format, questionStyle }) => {
@@ -902,7 +940,15 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 
   byId('print-sheet')?.addEventListener('click', () => window.print());
 
+  document.querySelectorAll('[data-preset]').forEach((button) => {
+    button.addEventListener('click', () => applyPreset(button.dataset.preset));
+  });
+  document.querySelectorAll('#session-format, #session-type, #session-level, #session-length, #question-style').forEach((node) => {
+    node.addEventListener('change', syncPracticeSetupCopy);
+  });
+
   renderHistory();
+  syncPracticeSetupCopy();
   applyPracticeLevelDefaults(byId('session-level')?.value || 'L0');
   renderSession();
 </script>
