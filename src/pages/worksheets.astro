@@ -9,6 +9,14 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     <h1>Ledger-style drill sheets</h1>
     <p>Choose a fixed curriculum sheet or generate a denser practice ledger by level, operation family, and digit band. Blank responses are skipped; partial score uses only answered drills.</p>
 
+    <div class="worksheet-preset-row">
+      <button class="button button-secondary preset-button" data-preset="warmup">Warm-up</button>
+      <button class="button button-secondary preset-button" data-preset="practice">Practice</button>
+      <button class="button button-secondary preset-button" data-preset="review">Review</button>
+      <button class="button button-secondary preset-button" data-preset="speed">Speed</button>
+      <button class="button button-secondary preset-button" data-preset="exam">Exam</button>
+    </div>
+
     <div class="ledger-controls worksheet-controls-shell">
       <div class="worksheet-controls-grid worksheet-controls-grid-main">
       <label class="stack-sm">
@@ -190,6 +198,14 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       L5: '4-6',
     };
 
+    const presets = {
+      warmup: { mode: 'fixed', level: 'L0', families: ['addition', 'subtraction'], band: '1', style: 'practice', orientation: 'ledger', count: '20' },
+      practice: { mode: 'dynamic', level: 'L2', families: ['mixed', 'sequence'], band: '2-3', style: 'practice', orientation: 'vertical', count: '40' },
+      review: { mode: 'adaptive', level: 'L2', families: ['mixed', 'sequence'], band: '2-3', style: 'review', orientation: 'vertical', count: '40' },
+      speed: { mode: 'dynamic', level: 'L3', families: ['addition', 'subtraction'], band: '2-3', style: 'speed', orientation: 'ledger', count: '60' },
+      exam: { mode: 'dynamic', level: 'L4', families: ['multiplication', 'division', 'sequence'], band: '3-4', style: 'exam', orientation: 'vertical', count: '40' },
+    };
+
     const byId = (id) => document.getElementById(id);
     const table = byId('worksheet-table');
     const scoreCopy = byId('worksheet-score-copy');
@@ -278,6 +294,21 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       } else {
         byId('worksheet-orientation').value = 'ledger';
       }
+    };
+
+    const applyPreset = (key) => {
+      const preset = presets[key];
+      if (!preset) return;
+      byId('worksheet-mode').value = preset.mode;
+      byId('worksheet-level').value = preset.level;
+      byId('worksheet-band').value = preset.band;
+      byId('worksheet-style').value = preset.style;
+      byId('worksheet-orientation').value = preset.orientation;
+      byId('worksheet-count').value = preset.count;
+      document.querySelectorAll('input[name="worksheet-family"]').forEach((node) => {
+        node.checked = preset.families.includes(node.value);
+      });
+      renderSheet();
     };
 
     const autoAlignOrientation = () => {
@@ -550,6 +581,9 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         autoAlignOrientation();
         renderSheet();
       });
+    });
+    document.querySelectorAll('[data-preset]').forEach((button) => {
+      button.addEventListener('click', () => applyPreset(button.dataset.preset));
     });
     table.addEventListener('click', (event) => {
       const button = event.target.closest('[data-row-action]');
