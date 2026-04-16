@@ -137,6 +137,10 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       <strong>Score</strong>
       <span id="worksheet-score-copy" class="muted">No answers checked yet.</span>
     </div>
+    <div id="worksheet-celebration" class="worksheet-celebration" hidden>
+      <strong>Congratulations</strong>
+      <span>You completed the full sheet with perfect accuracy.</span>
+    </div>
     <div class="worksheet-score-grid">
       <article class="stat-card stat-card-soft"><span id="worksheet-answered">0</span><small>Answered</small></article>
       <article class="stat-card stat-card-soft"><span id="worksheet-correct">0</span><small>Correct</small></article>
@@ -228,12 +232,14 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     const byId = (id) => document.getElementById(id);
     const table = byId('worksheet-table');
     const scoreCopy = byId('worksheet-score-copy');
+    const celebration = byId('worksheet-celebration');
     const adaptiveNote = byId('adaptive-note');
     const adaptiveNoteCopy = byId('adaptive-note-copy');
     const currentSetupCopy = byId('worksheet-current-setup-copy');
     const exerciseStateKey = 'soroban-dojo:exercise-states';
     let worksheetTimerStartedAt = null;
     let worksheetTimerInterval = null;
+    let celebrationTimeout = null;
     const setPrintMode = () => {
       document.documentElement.dataset.worksheetPrintMode = byId('worksheet-print-mode')?.value || 'student';
     };
@@ -526,6 +532,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         setMetric('worksheet-correct', 0);
         setMetric('worksheet-accuracy', '0%');
         setMetric('worksheet-completion', '0%');
+        celebration.hidden = true;
         return;
       }
       const percent = Math.round((correct / answered) * 100);
@@ -535,6 +542,18 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       setMetric('worksheet-correct', correct);
       setMetric('worksheet-accuracy', `${percent}%`);
       setMetric('worksheet-completion', `${completion}%`);
+      if (answered === inputs.length && correct === answered) {
+        celebration.hidden = false;
+        celebration.classList.add('celebrate');
+        if (celebrationTimeout) window.clearTimeout(celebrationTimeout);
+        celebrationTimeout = window.setTimeout(() => {
+          celebration.hidden = true;
+          celebration.classList.remove('celebrate');
+        }, 6000);
+      } else {
+        celebration.hidden = true;
+        celebration.classList.remove('celebrate');
+      }
     };
 
     const scoreSingleRow = (row, reveal = false) => {
