@@ -64,6 +64,17 @@ const { lessons, exercises } = Astro.props;
   </div>
 
   <section class="panel ink-panel">
+    <p class="eyebrow">Recommended next move</p>
+    <div class="next-move-grid">
+      <div>
+        <h3 id="next-move-title">Start your first lesson</h3>
+        <p id="next-move-copy" class="muted">Begin with a calm lesson, then move into one short practice session.</p>
+      </div>
+      <div class="button-row" id="next-move-actions"></div>
+    </div>
+  </section>
+
+  <section class="panel ink-panel">
     <p class="eyebrow">Skill map</p>
     <h3>Mastery by practice area</h3>
     <div id="skill-map" class="skill-map"></div>
@@ -125,6 +136,7 @@ const { lessons, exercises } = Astro.props;
   const recentSessions = document.getElementById('recent-sessions');
   const reflectionChips = document.getElementById('reflection-chips');
   const skillMap = document.getElementById('skill-map');
+  const nextMoveActions = document.getElementById('next-move-actions');
 
   document.getElementById('completed-lessons').textContent = String(lessonData.length);
   document.getElementById('attempted-exercises').textContent = String(attempted.length);
@@ -144,6 +156,41 @@ const { lessons, exercises } = Astro.props;
     : 'Small steps, steady hands.';
   document.getElementById('journey-title').textContent = journeyTitle;
   document.getElementById('journey-copy').textContent = journeyCopy;
+
+  const setNextMove = (title, copy, actions) => {
+    document.getElementById('next-move-title').textContent = title;
+    document.getElementById('next-move-copy').textContent = copy;
+    nextMoveActions.replaceChildren();
+    actions.forEach(({ href, label, secondary }) => {
+      const link = document.createElement('a');
+      link.href = href;
+      link.className = secondary ? 'button button-secondary' : 'button';
+      link.textContent = label;
+      nextMoveActions.appendChild(link);
+    });
+  };
+
+  if (!lessonData.length) {
+    setNextMove('Start your first lesson', 'Begin with a calm lesson, then move into one short practice session.', [
+      { href: '/ai-soroban/start-here', label: 'Start here' },
+      { href: '/ai-soroban/lessons', label: 'Browse lessons', secondary: true },
+    ]);
+  } else if (reviewItems.length) {
+    setNextMove('Review weak areas next', 'You have items marked for review. Repairing them now is the best way to steady your progress.', [
+      { href: '/ai-soroban/practice', label: 'Open practice' },
+      { href: '/ai-soroban/worksheets', label: 'Open worksheet', secondary: true },
+    ]);
+  } else if (!finishedSessions.length) {
+    setNextMove('Complete a full session', 'You have started learning; now complete one focused session to build rhythm.', [
+      { href: '/ai-soroban/practice', label: 'Start practice' },
+      { href: '/ai-soroban/worksheets', label: 'Generate worksheet', secondary: true },
+    ]);
+  } else {
+    setNextMove('Advance with stronger drills', 'Your recent progress is steady. Push forward with a worksheet or a fresh practice session.', [
+      { href: '/ai-soroban/worksheets', label: 'Open worksheet' },
+      { href: '/ai-soroban/practice', label: 'New practice session', secondary: true },
+    ]);
+  }
 
   const gardenPieces = [
     ...Array.from({ length: Math.min(lessonData.length, 6) }, () => 'stone'),
