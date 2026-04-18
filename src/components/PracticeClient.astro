@@ -48,7 +48,9 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       <button class="button button-secondary practice-preset" data-preset="speed">Speed</button>
       <button class="button button-secondary practice-preset" data-preset="mental">Mental</button>
     </div>
-    <div class="practice-grid">
+    <details class="practice-setup-block" open>
+      <summary>Adjust session setup</summary>
+      <div class="practice-grid">
       <div class="stack-sm subtle-panel practice-config-panel">
         <p class="eyebrow">Session shape</p>
         <label class="stack-sm">
@@ -133,6 +135,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         <button class="button button-secondary" id="resume-by-id">Open saved ID</button>
       </div>
     </div>
+    </details>
     <div class="subtle-panel practice-current-setup">
       <strong>Current setup</strong>
       <span id="practice-current-setup-copy" class="muted small">single · curated · L0 · 10 questions · mixed · auto terms · timer off</span>
