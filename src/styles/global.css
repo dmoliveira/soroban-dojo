@@ -167,6 +167,7 @@ a { color: inherit; text-decoration: none; }
 .practice-current-setup { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; padding: 0.38rem 0.62rem; border-radius: 12px; }
 .practice-mode-guide { padding: 0.55rem 0.72rem; border-radius: 12px; }
 .practice-mode-guide p { margin: 0.28rem 0 0; }
+.practice-purpose-strip { display: flex; justify-content: space-between; align-items: center; gap: 0.65rem; padding: 0.45rem 0.65rem; border-radius: 12px; }
 .practice-quick-paths { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .sora-sheet-note { background: linear-gradient(180deg, rgba(234,211,204,0.35), rgba(255,255,255,0.58)); }
 .worksheet-controls-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.6rem; align-items: start; }
