@@ -135,6 +135,7 @@ a { color: inherit; text-decoration: none; }
 .question-shell { display: grid; gap: 0.6rem; }
 .practice-session-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; }
 .practice-session-meta { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+.practice-learning-strip { display: grid; gap: 0.35rem; padding: 0.5rem 0.7rem; border-radius: 12px; background: rgba(255,255,255,0.42); border: 1px solid rgba(99,88,79,0.12); }
 .visual-stage { min-height: 132px; display: grid; align-items: center; }
 .question-stage { display: grid; gap: 0.55rem; background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(251,248,242,0.86)); }
 .practice-empty-note { padding: 0.62rem 0.75rem; border-radius: 14px; background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(248,242,233,0.68)); border: 1px dashed rgba(99,88,79,0.16); }

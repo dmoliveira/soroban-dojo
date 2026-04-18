@@ -165,6 +165,14 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         <div id="session-id">Session ID —</div>
         <div id="session-adaptive-note">Adaptive note —</div>
       </div>
+      <div class="practice-learning-strip">
+        <strong>Learning path</strong>
+        <div class="button-row button-row-compact">
+          <a class="button button-secondary" href={`${base}lessons`}>Browse lessons</a>
+          <a class="button button-secondary" href={`${base}exercises`}>Open exercises</a>
+          <a class="button button-secondary" href={`${base}worksheets`}>Open worksheets</a>
+        </div>
+      </div>
 
       <div id="visual-mount" class="subtle-panel visual-stage" hidden></div>
       <div id="single-session-view" class="subtle-panel question-stage">
