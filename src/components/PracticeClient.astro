@@ -169,8 +169,8 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         <article class="stat-card stat-card-soft"><span id="session-timer">Off</span><small>Timer</small></article>
       </div>
       <div class="practice-session-meta">
-        <div class="subtle-panel practice-meta-card"><strong>Session</strong><span id="session-id" class="muted small">Session ID —</span></div>
-        <div class="subtle-panel practice-meta-card"><strong>Adaptive</strong><span id="session-adaptive-note" class="muted small">Adaptive note —</span></div>
+        <div class="subtle-panel practice-meta-card"><strong>Session ID</strong><span id="session-id" class="muted small">—</span></div>
+        <div class="subtle-panel practice-meta-card"><strong>Adaptive focus</strong><span id="session-adaptive-note" class="muted small">—</span></div>
       </div>
       <div class="practice-learning-strip">
         <strong>Learning path</strong>
@@ -807,11 +807,11 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 
     if (!currentSession) {
       title.textContent = 'No session selected yet';
-      sessionIdLabel.textContent = 'Session ID —';
+      sessionIdLabel.textContent = '—';
       progress.textContent = 'Question 0 / 0';
       score.textContent = 'Score —';
       timer.textContent = 'Timer off';
-      adaptiveNote.textContent = 'Adaptive note —';
+      adaptiveNote.textContent = '—';
       questionTitle.textContent = 'Choose a session to begin.';
       questionPrompt.textContent = 'Curated lists follow the lessons; generated lists create replayable arithmetic practice.';
       answerInput.value = '';
@@ -827,11 +827,11 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     const question = currentSession.questions[currentSession.currentIndex];
     const response = responseForCurrent();
     title.textContent = `${currentSession.type === 'curated' ? 'Curated' : 'Generated'} ${currentSession.level} session`;
-    sessionIdLabel.textContent = `Session ID ${currentSession.id}`;
+    sessionIdLabel.textContent = currentSession.id;
     progress.textContent = `Question ${currentSession.currentIndex + 1} / ${currentSession.questions.length}`;
     score.textContent = `Score ${(currentSession.completed ? currentSession.finalScore : computeSessionScore(currentSession)) || 0}/100`;
     timer.textContent = currentSession.timerEnabled ? 'Timer on' : 'Timer off';
-    adaptiveNote.textContent = currentSession.questionStyle === 'adaptive' ? describeAdaptivePractice(currentSession.level) : 'Adaptive note —';
+    adaptiveNote.textContent = currentSession.questionStyle === 'adaptive' ? describeAdaptivePractice(currentSession.level) : 'Standard session';
     questionTitle.textContent = currentSession.completed ? 'Session completed' : question.title;
     questionPrompt.textContent = currentSession.completed
       ? 'Review your score, replay the same list, or start a fresh session with a new ID.'
