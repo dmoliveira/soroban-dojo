@@ -14,6 +14,13 @@ const { Content } = await render(exercise);
 const lessons = await getCollection('lessons');
 const relatedLesson = lessons.find((lesson) => lesson.data.relatedExercises.includes(exercise.data.id));
 const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+const bestFor = exercise.data.type === 'visual-check'
+  ? 'Best for bead recognition and calm reading before moving into full arithmetic practice.'
+  : exercise.data.type === 'setup'
+    ? 'Best for controlled placement and accurate soroban setup before longer drills.'
+    : exercise.data.type === 'addition' || exercise.data.type === 'subtraction'
+      ? 'Best for short accuracy checks before moving into longer worksheet or sequence work.'
+      : 'Best for focused single-question practice and careful method review.';
 ---
 
 <BaseLayout title={`${exercise.data.title} | Soroban Dojo`}>
@@ -37,6 +44,10 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       <article class="stat-card stat-card-soft"><span>{exercise.data.type}</span><small>Type</small></article>
       <article class="stat-card stat-card-soft"><span>{exercise.data.estimatedMinutes}m</span><small>Time</small></article>
     </section>
+    <div class="subtle-panel exercise-best-for-panel">
+      <strong>Best for</strong>
+      <p class="muted">{bestFor}</p>
+    </div>
     <div class="exercise-intro-panel subtle-panel">
       <p><strong>Practice rule:</strong> try this before opening the hint or answer.</p>
       <Content />
