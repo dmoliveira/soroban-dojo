@@ -91,6 +91,13 @@ const bestFor = exercise.data.type === 'visual-check'
         {relatedLesson && <a class="button button-secondary" href={`${base}lessons/${relatedLesson.slug}`}>Review lesson</a>}
       </div>
       <p class="muted">Move straight into guided practice, or open worksheets for a denser set of drills around this same skill.</p>
+      {relatedLesson && (
+        <div class="subtle-panel exercise-related-lesson">
+          <strong>Related lesson</strong>
+          <p class="muted">{relatedLesson.data.title}</p>
+          <a class="text-link" href={`${base}lessons/${relatedLesson.slug}`}>Open lesson →</a>
+        </div>
+      )}
     </section>
   </article>
 
