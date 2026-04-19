@@ -689,6 +689,22 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     writeSessions(sessions.slice(0, 12));
   };
 
+  const applyWriteCellShortcut = (event) => {
+    const input = event.currentTarget;
+    if (!(input instanceof HTMLInputElement) || event.metaKey || event.ctrlKey || event.altKey) return false;
+    if (event.key === '*' || event.code === 'NumpadMultiply') {
+      event.preventDefault();
+      input.value = '';
+      return true;
+    }
+    if (event.key === '-' || event.code === 'NumpadSubtract') {
+      event.preventDefault();
+      input.value = input.value.slice(0, -1);
+      return true;
+    }
+    return false;
+  };
+
   const responseForCurrent = () => currentSession?.responses?.[currentSession.currentIndex] || {
     input: '',
     hintsUsed: 0,
@@ -736,6 +752,34 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       updatedAt: new Date().toISOString(),
     };
     writeExerciseStates(existing);
+  };
+
+  const verifyCurrentAnswer = () => {
+    if (!currentSession || currentSession.completed) return false;
+    const question = currentSession.questions[currentSession.currentIndex];
+    const input = byId('answer-input').value.trim();
+    const feedback = byId('feedback-panel');
+    if (!input) {
+      feedback.hidden = false;
+      feedback.textContent = 'Write your response first, or choose to reveal the answer or method.';
+      return false;
+    }
+    const numericInput = Number(input);
+    const correct = input !== '' && !Number.isNaN(numericInput) && numericInput === question.answer;
+    updateCurrentResponse({ input, verified: true, correct });
+    feedback.hidden = false;
+    playTone(correct ? 'success' : 'error');
+    feedback.textContent = correct ? 'Correct. Your response matches the answer. You may continue or reveal the method to study it.' : 'Not correct yet. Revise your response, or reveal the answer or the method.';
+
+    if (currentSession.checkMode === 'final' || currentSession.checkMode === 'steps') {
+      updateCurrentResponse({ revealedFinal: true });
+      feedback.textContent += ` Answer: ${question.answer}.`;
+    }
+    if (currentSession.checkMode === 'steps') {
+      updateCurrentResponse({ revealedSteps: true });
+    }
+    renderSession();
+    return correct;
   };
 
   const renderVisual = (value) => {
@@ -1019,35 +1063,13 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
   });
 
   byId('verify-answer')?.addEventListener('click', () => {
-    if (!currentSession || currentSession.completed) return;
-    const question = currentSession.questions[currentSession.currentIndex];
-    const input = byId('answer-input').value.trim();
-    const feedback = byId('feedback-panel');
-    if (!input) {
-      feedback.hidden = false;
-      feedback.textContent = 'Write your response first, or choose to reveal the answer or method.';
-      return;
-    }
-    const numericInput = Number(input);
-    const correct = input !== '' && !Number.isNaN(numericInput) && numericInput === question.answer;
-    updateCurrentResponse({ input, verified: true, correct });
-    feedback.hidden = false;
-    playTone(correct ? 'success' : 'error');
-    feedback.textContent = correct ? 'Correct. Your response matches the answer. You may continue or reveal the method to study it.' : 'Not correct yet. Revise your response, or reveal the answer or the method.';
-
-    if (currentSession.checkMode === 'final' || currentSession.checkMode === 'steps') {
-      updateCurrentResponse({ revealedFinal: true });
-      feedback.textContent += ` Answer: ${question.answer}.`;
-    }
-    if (currentSession.checkMode === 'steps') {
-      updateCurrentResponse({ revealedSteps: true });
-    }
-    renderSession();
+    verifyCurrentAnswer();
   });
   byId('answer-input')?.addEventListener('keydown', (event) => {
+    if (applyWriteCellShortcut(event)) return;
     if (event.key !== 'Enter') return;
     event.preventDefault();
-    byId('verify-answer')?.click();
+    if (verifyCurrentAnswer()) byId('next-question')?.click();
   });
 
   byId('reveal-final')?.addEventListener('click', () => {

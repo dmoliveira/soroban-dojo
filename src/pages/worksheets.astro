@@ -583,10 +583,26 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       }
     };
 
+    const applyWriteCellShortcut = (event) => {
+      const input = event.target.closest('.worksheet-input');
+      if (!(input instanceof HTMLInputElement) || event.metaKey || event.ctrlKey || event.altKey) return false;
+      if (event.key === '*' || event.code === 'NumpadMultiply') {
+        event.preventDefault();
+        input.value = '';
+        return true;
+      }
+      if (event.key === '-' || event.code === 'NumpadSubtract') {
+        event.preventDefault();
+        input.value = input.value.slice(0, -1);
+        return true;
+      }
+      return false;
+    };
+
     const scoreSingleRow = (row, reveal = false) => {
       const input = row.querySelector('.worksheet-input');
       const feedback = row.querySelector('.worksheet-feedback');
-      if (!input || !feedback) return;
+      if (!input || !feedback) return false;
       const expected = solvePrompt(input.dataset.prompt);
       const value = input.value.trim();
       if (!value) {
@@ -594,7 +610,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         feedback.className = `worksheet-feedback ${reveal ? 'revealed' : 'needs-work'}`;
         row.classList.remove('row-ok', 'row-needs-work', 'row-revealed');
         row.classList.add(reveal ? 'row-revealed' : 'row-needs-work');
-        return;
+        return false;
       }
       const isCorrect = Number(value) === expected;
       playTone(reveal ? 'success' : isCorrect ? 'success' : 'error');
@@ -602,6 +618,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       feedback.className = `worksheet-feedback ${reveal ? 'revealed' : isCorrect ? 'ok' : 'needs-work'}`;
       row.classList.remove('row-ok', 'row-needs-work', 'row-revealed');
       row.classList.add(reveal ? 'row-revealed' : isCorrect ? 'row-ok' : 'row-needs-work');
+      return isCorrect;
     };
 
     const syncTimer = () => {
@@ -675,13 +692,17 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       scoreSingleRow(row, button.dataset.rowAction === 'reveal');
     });
     table.addEventListener('keydown', (event) => {
+      if (applyWriteCellShortcut(event)) return;
       if (event.key !== 'Enter') return;
       const input = event.target.closest('.worksheet-input');
       if (!input) return;
       event.preventDefault();
       const row = input.closest('.ledger-row, .vertical-drill-row');
       if (!row) return;
-      scoreSingleRow(row, false);
+      if (!scoreSingleRow(row, false)) return;
+      const inputs = Array.from(document.querySelectorAll('.worksheet-input'));
+      const nextInput = inputs[inputs.indexOf(input) + 1];
+      if (nextInput instanceof HTMLInputElement) nextInput.focus();
     });
     document.querySelectorAll('#worksheet-mode, #worksheet-level, #worksheet-family, #worksheet-band, #worksheet-style, #worksheet-orientation, #worksheet-count, #worksheet-print-mode').forEach((node) => {
       node.addEventListener('change', renderSheet);

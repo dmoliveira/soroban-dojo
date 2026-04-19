@@ -141,6 +141,22 @@ const bestFor = exercise.data.type === 'visual-check'
       return Number.isNaN(parsed) ? null : parsed;
     };
 
+    const applyWriteCellShortcut = (event) => {
+      const input = event.currentTarget;
+      if (!(input instanceof HTMLInputElement) || event.metaKey || event.ctrlKey || event.altKey) return false;
+      if (event.key === '*' || event.code === 'NumpadMultiply') {
+        event.preventDefault();
+        input.value = '';
+        return true;
+      }
+      if (event.key === '-' || event.code === 'NumpadSubtract') {
+        event.preventDefault();
+        input.value = input.value.slice(0, -1);
+        return true;
+      }
+      return false;
+    };
+
     document.getElementById('verify-exercise')?.addEventListener('click', () => {
       const value = responseInput.value.trim();
       if (!value) {
@@ -189,6 +205,7 @@ const bestFor = exercise.data.type === 'visual-check'
       responseInput.focus();
     });
     responseInput?.addEventListener('keydown', (event) => {
+      if (applyWriteCellShortcut(event)) return;
       if (event.key !== 'Enter') return;
       event.preventDefault();
       document.getElementById('verify-exercise')?.click();
