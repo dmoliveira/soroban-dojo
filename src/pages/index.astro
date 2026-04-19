@@ -27,6 +27,15 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     </div>
   </div>
 
+  <div class="hero-quick-links panel">
+    <strong>Best starting paths</strong>
+    <div class="button-row button-row-compact">
+      <a class="button button-secondary" href={`${base}start-here`}>Start here</a>
+      <a class="button button-secondary" href={`${base}paths/children`}>Children path</a>
+      <a class="button button-secondary" href={`${base}paths/adults`}>Adult path</a>
+    </div>
+  </div>
+
   <PathCards />
 
   <section class="split-grid">
