@@ -1,0 +1,86 @@
+import { expect, test } from '@playwright/test';
+
+const triggerShortcut = async (locator, key, code) => {
+  await locator.dispatchEvent('keydown', { key, code, bubbles: true, cancelable: true });
+};
+
+const solvePracticePrompt = (prompt) => {
+  const addMatch = prompt.match(/Start from (\d+)\. Add (\d+)\./);
+  if (addMatch) return Number(addMatch[1]) + Number(addMatch[2]);
+
+  const subtractMatch = prompt.match(/Start from (\d+)\. Subtract (\d+)\./);
+  if (subtractMatch) return Number(subtractMatch[1]) - Number(subtractMatch[2]);
+
+  throw new Error(`Unsupported practice prompt: ${prompt}`);
+};
+
+const solveWorksheetPrompt = (prompt) => {
+  const normalized = prompt.replace('×', '*').replace('÷', '/');
+  const tokens = normalized.split(' ');
+  let total = Number(tokens[0]);
+
+  for (let index = 1; index < tokens.length; index += 2) {
+    const operator = tokens[index];
+    const value = Number(tokens[index + 1]);
+    if (operator === '+') total += value;
+    else if (operator === '-') total -= value;
+    else if (operator === '*') total *= value;
+    else if (operator === '/') total /= value;
+  }
+
+  return total;
+};
+
+test('practice Enter verifies and advances on correct answer', async ({ page }) => {
+  await page.goto('/ai-soroban/practice');
+
+  await page.getByText('Adjust session setup').click();
+  await page.selectOption('#session-format', 'single');
+  await page.selectOption('#session-type', 'generated');
+  await page.selectOption('#session-level', 'L1');
+  await page.selectOption('#session-length', '5');
+  await page.getByRole('button', { name: 'Start new session' }).click();
+
+  await expect(page.locator('#session-progress')).toContainText('Question 1 / 5');
+  const prompt = await page.locator('#question-prompt').textContent();
+  const answer = solvePracticePrompt(prompt ?? '');
+
+  await page.locator('#answer-input').fill(String(answer));
+  await page.locator('#answer-input').press('Enter');
+
+  await expect(page.locator('#session-progress')).toContainText('Question 2 / 5');
+});
+
+test('worksheet shortcuts clear, backspace, and advance after correct Enter', async ({ page }) => {
+  await page.goto('/ai-soroban/worksheets');
+
+  const firstInput = page.locator('.worksheet-input').first();
+  await firstInput.fill('123');
+  await triggerShortcut(firstInput, '-', 'NumpadSubtract');
+  await expect(firstInput).toHaveValue('12');
+  await triggerShortcut(firstInput, '*', 'NumpadMultiply');
+  await expect(firstInput).toHaveValue('');
+
+  const prompt = await firstInput.getAttribute('data-prompt');
+  const answer = solveWorksheetPrompt(prompt ?? '');
+  await firstInput.fill(String(answer));
+  await firstInput.press('Enter');
+
+  await expect(page.locator('.worksheet-input').nth(1)).toBeFocused();
+});
+
+test('exercise shortcuts clear, backspace, and Enter verifies expected value', async ({ page }) => {
+  await page.goto('/ai-soroban/exercises/l1/add-two-and-three');
+
+  const input = page.locator('#exercise-response');
+  await input.fill('123');
+  await triggerShortcut(input, '-', 'NumpadSubtract');
+  await expect(input).toHaveValue('12');
+  await triggerShortcut(input, '*', 'NumpadMultiply');
+  await expect(input).toHaveValue('');
+
+  await input.fill('5');
+  await input.press('Enter');
+
+  await expect(page.locator('#exercise-state-status')).toContainText('Correct');
+});

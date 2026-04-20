@@ -310,6 +310,14 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     };
 
     const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const shuffle = (items) => {
+      const copy = [...items];
+      for (let index = copy.length - 1; index > 0; index -= 1) {
+        const swapIndex = rand(0, index);
+        [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+      }
+      return copy;
+    };
     const randomDigits = (band) => {
       const { min, max } = parseBand(band);
       return rand(min, max);
@@ -405,16 +413,19 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     };
 
     const makeDynamicPrompt = (level, family, band, style) => {
+      const adjustedBand = styleAdjustBand(style, band);
+      const bandRange = parseBand(adjustedBand);
+      const randomNumberForBand = () => randomNumberForDigits(randomDigits(adjustedBand));
+
       if (family === 'sequence' || family === 'anzan') {
-        const digits = randomDigits(styleAdjustBand(style, band));
-        const a = randomNumberForDigits(Math.max(1, Math.min(digits, level === 'L5' ? 4 : 3)));
-        const b = randomNumberForDigits(Math.max(1, Math.min(digits, 2)));
-        const c = randomNumberForDigits(1);
-        const d = family === 'anzan' && level === 'L5' ? randomNumberForDigits(1) : null;
+        const a = randomNumberForBand();
+        const b = randomNumberForBand();
+        const c = randomNumberForBand();
+        const d = family === 'anzan' && level === 'L5' ? randomNumberForBand() : null;
         return d ? `${a} + ${b} - ${c} + ${d}` : `${a} + ${b} - ${c}`;
       }
       const resolvedFamily = chooseFamily(level, family);
-      const digits = randomDigits(styleAdjustBand(style, band));
+      const digits = randomDigits(adjustedBand);
       if (resolvedFamily === 'multiplication') {
         const a = randomNumberForDigits(Math.min(level === 'L5' ? 3 : 2, digits));
         const b = rand(2, level === 'L5' ? 12 : 9);
@@ -426,12 +437,30 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         return `${divisor * quotient} ÷ ${divisor}`;
       }
       const aDigits = digits;
-      const bDigits = Math.max(1, digits - (Math.random() > 0.5 ? 0 : 1));
+      const bDigits = rand(bandRange.min, aDigits);
       const a = randomNumberForDigits(aDigits);
       const bRaw = randomNumberForDigits(bDigits);
       if (resolvedFamily === 'addition') return `${a} + ${bRaw}`;
       const b = Math.min(bRaw, a);
       return `${a} - ${b}`;
+    };
+
+    const buildUniquePrompts = (count, createPrompt) => {
+      const prompts = [];
+      const seen = new Set();
+      let attempts = 0;
+      const maxAttempts = Math.max(count * 30, 120);
+
+      while (prompts.length < count && attempts < maxAttempts) {
+        const prompt = createPrompt(prompts.length);
+        attempts += 1;
+        if (seen.has(prompt)) continue;
+        seen.add(prompt);
+        prompts.push(prompt);
+      }
+
+      while (prompts.length < count) prompts.push(createPrompt(prompts.length));
+      return prompts;
     };
 
     const buildPrompts = () => {
@@ -444,8 +473,11 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       const bank = fixedBanks[level] || {};
       const fixedPool = families.flatMap((family) => bank[family] || []).filter(Boolean);
       const fixedFamily = fixedPool.length ? fixedPool : bank.mixed || Object.values(bank)[0] || [];
+      if (!fixedFamily.length) return [];
       if (mode === 'fixed') {
-        return Array.from({ length: count }, (_, index) => fixedFamily[index % fixedFamily.length]);
+        const cycled = [];
+        while (cycled.length < count) cycled.push(...shuffle(fixedFamily));
+        return cycled.slice(0, count);
       }
       if (mode === 'adaptive') {
         const weakAreas = readWeakAreas();
@@ -454,9 +486,9 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
           : weakAreas.complements > weakAreas.arithmetic
             ? 'anzan'
             : families[0] || 'addition';
-        return Array.from({ length: count }, () => makeDynamicPrompt(level, adaptiveFamily, band, style));
+        return buildUniquePrompts(count, () => makeDynamicPrompt(level, adaptiveFamily, band, style));
       }
-      return Array.from({ length: count }, (_, index) => makeDynamicPrompt(level, families[index % Math.max(1, families.length)] || 'addition', band, style));
+      return buildUniquePrompts(count, (index) => makeDynamicPrompt(level, families[index % Math.max(1, families.length)] || 'addition', band, style));
     };
 
     const renderSheet = () => {
@@ -580,10 +612,26 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       }
     };
 
+    const applyWriteCellShortcut = (event) => {
+      const input = event.target.closest('.worksheet-input');
+      if (!(input instanceof HTMLInputElement) || event.metaKey || event.ctrlKey || event.altKey) return false;
+      if (event.key === '*' || event.code === 'NumpadMultiply') {
+        event.preventDefault();
+        input.value = '';
+        return true;
+      }
+      if (event.key === '-' || event.code === 'NumpadSubtract') {
+        event.preventDefault();
+        input.value = input.value.slice(0, -1);
+        return true;
+      }
+      return false;
+    };
+
     const scoreSingleRow = (row, reveal = false) => {
       const input = row.querySelector('.worksheet-input');
       const feedback = row.querySelector('.worksheet-feedback');
-      if (!input || !feedback) return;
+      if (!input || !feedback) return false;
       const expected = solvePrompt(input.dataset.prompt);
       const value = input.value.trim();
       if (!value) {
@@ -591,7 +639,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         feedback.className = `worksheet-feedback ${reveal ? 'revealed' : 'needs-work'}`;
         row.classList.remove('row-ok', 'row-needs-work', 'row-revealed');
         row.classList.add(reveal ? 'row-revealed' : 'row-needs-work');
-        return;
+        return false;
       }
       const isCorrect = Number(value) === expected;
       playTone(reveal ? 'success' : isCorrect ? 'success' : 'error');
@@ -599,6 +647,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       feedback.className = `worksheet-feedback ${reveal ? 'revealed' : isCorrect ? 'ok' : 'needs-work'}`;
       row.classList.remove('row-ok', 'row-needs-work', 'row-revealed');
       row.classList.add(reveal ? 'row-revealed' : isCorrect ? 'row-ok' : 'row-needs-work');
+      return isCorrect;
     };
 
     const syncTimer = () => {
@@ -672,13 +721,17 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       scoreSingleRow(row, button.dataset.rowAction === 'reveal');
     });
     table.addEventListener('keydown', (event) => {
+      if (applyWriteCellShortcut(event)) return;
       if (event.key !== 'Enter') return;
       const input = event.target.closest('.worksheet-input');
       if (!input) return;
       event.preventDefault();
       const row = input.closest('.ledger-row, .vertical-drill-row');
       if (!row) return;
-      scoreSingleRow(row, false);
+      if (!scoreSingleRow(row, false)) return;
+      const inputs = Array.from(document.querySelectorAll('.worksheet-input'));
+      const nextInput = inputs[inputs.indexOf(input) + 1];
+      if (nextInput instanceof HTMLInputElement) nextInput.focus();
     });
     document.querySelectorAll('#worksheet-mode, #worksheet-level, #worksheet-family, #worksheet-band, #worksheet-style, #worksheet-orientation, #worksheet-count, #worksheet-print-mode').forEach((node) => {
       node.addEventListener('change', renderSheet);
