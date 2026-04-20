@@ -327,6 +327,121 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       const max = (10 ** digits) - 1;
       return rand(min, max);
     };
+    const minValueForDigits = (digits) => (digits === 1 ? 1 : 10 ** (digits - 1));
+    const maxValueForDigits = (digits) => (10 ** digits) - 1;
+    const digitLength = (value) => String(Math.abs(value)).length;
+    const randomNumberForDigitsWhere = (digits, predicate) => {
+      for (let attempt = 0; attempt < 40; attempt += 1) {
+        const candidate = randomNumberForDigits(digits);
+        if (predicate(candidate)) return candidate;
+      }
+      return null;
+    };
+    const pickDigitsForVariant = (bandRange, variant) => {
+      if (bandRange.min === bandRange.max) return bandRange.min;
+      const spread = bandRange.max - bandRange.min;
+      if (variant % 4 === 0) return bandRange.max;
+      if (variant % 4 === 1) return bandRange.min;
+      if (variant % 4 === 2) return Math.max(bandRange.min, bandRange.max - 1);
+      return bandRange.min + rand(0, spread);
+    };
+    const buildAdditionPrompt = (bandRange, variant) => {
+      const aDigits = pickDigitsForVariant(bandRange, variant);
+      const bDigits = pickDigitsForVariant({ min: bandRange.min, max: aDigits }, variant + 1);
+      const aFallback = randomNumberForDigits(aDigits);
+      const bFallback = randomNumberForDigits(bDigits);
+
+      if (variant % 4 === 0) {
+        const a = randomNumberForDigitsWhere(aDigits, (value) => value % 10 >= 6) ?? aFallback;
+        const b = randomNumberForDigitsWhere(bDigits, (value) => value % 10 >= 4) ?? bFallback;
+        return `${a} + ${b}`;
+      }
+      if (variant % 4 === 1) {
+        const aOnes = rand(1, 9);
+        const bOnes = 10 - aOnes;
+        const a = randomNumberForDigitsWhere(aDigits, (value) => value % 10 === aOnes) ?? aFallback;
+        const b = randomNumberForDigitsWhere(bDigits, (value) => value % 10 === bOnes) ?? bFallback;
+        return `${a} + ${b}`;
+      }
+      if (variant % 4 === 2) {
+        const a = randomNumberForDigits(aDigits);
+        const offset = rand(1, Math.max(3, 10 ** Math.max(0, bDigits - 1)));
+        const bMin = minValueForDigits(bDigits);
+        const bMax = maxValueForDigits(bDigits);
+        const b = Math.max(bMin, Math.min(bMax, a + (variant % 2 === 0 ? offset : -offset)));
+        return `${a} + ${b}`;
+      }
+      const a = randomNumberForDigits(bandRange.max);
+      const b = randomNumberForDigits(bandRange.min);
+      return `${a} + ${b}`;
+    };
+    const buildSubtractionPrompt = (bandRange, variant) => {
+      const aDigits = pickDigitsForVariant(bandRange, variant);
+      const bDigits = pickDigitsForVariant({ min: bandRange.min, max: aDigits }, variant + 1);
+      const genericA = randomNumberForDigits(aDigits);
+      const genericB = Math.min(randomNumberForDigits(bDigits), genericA);
+
+      if (variant % 4 === 0) {
+        const a = randomNumberForDigitsWhere(aDigits, (value) => value % 10 <= 3 && value > minValueForDigits(bDigits)) ?? genericA;
+        const b = randomNumberForDigitsWhere(bDigits, (value) => value < a && value % 10 >= 4) ?? Math.min(randomNumberForDigits(bDigits), a);
+        return `${a} - ${b}`;
+      }
+      if (variant % 4 === 1) {
+        const b = randomNumberForDigits(bDigits);
+        const aMin = Math.max(minValueForDigits(aDigits), b + 5);
+        const aMax = Math.min(maxValueForDigits(aDigits), b + Math.max(12, minValueForDigits(bDigits)));
+        if (aMin <= aMax) return `${rand(aMin, aMax)} - ${b}`;
+      }
+      if (variant % 4 === 2) {
+        const a = randomNumberForDigits(bandRange.max);
+        const b = Math.min(randomNumberForDigits(bandRange.min), a - 1);
+        return `${a} - ${Math.max(1, b)}`;
+      }
+      return `${genericA} - ${genericB}`;
+    };
+    const buildSequencePrompt = (family, bandRange, variant) => {
+      const patterns = family === 'anzan'
+        ? [['+', '-', '+'], ['+', '+', '-'], ['-', '+', '+'], ['+', '-', '+', '+']]
+        : [['+', '-'], ['-', '+'], ['+', '+', '-'], ['+', '-', '+'], ['-', '+', '+']];
+      const pattern = patterns[variant % patterns.length];
+      const startDigits = pattern.includes('-') ? bandRange.max : pickDigitsForVariant(bandRange, variant);
+      const startMin = pattern.includes('-') ? Math.max(minValueForDigits(startDigits), Math.floor(maxValueForDigits(startDigits) * 0.55)) : minValueForDigits(startDigits);
+      let total = rand(startMin, maxValueForDigits(startDigits));
+      const parts = [String(total)];
+
+      pattern.forEach((operator, index) => {
+        if (operator === '+') {
+          const addDigits = pickDigitsForVariant(bandRange, variant + index + 1);
+          const value = randomNumberForDigits(addDigits);
+          total += value;
+          parts.push('+', String(value));
+          return;
+        }
+
+        const maxSubtractDigits = Math.min(bandRange.max, digitLength(Math.max(total - minValueForDigits(bandRange.min), 0)));
+        if (maxSubtractDigits < bandRange.min) {
+          const value = randomNumberForDigits(pickDigitsForVariant(bandRange, variant + index + 1));
+          total += value;
+          parts.push('+', String(value));
+          return;
+        }
+
+        const subtractDigits = pickDigitsForVariant({ min: bandRange.min, max: maxSubtractDigits }, variant + index + 1);
+        const minimumRemainder = minValueForDigits(Math.min(bandRange.min, digitLength(total)));
+        const value = randomNumberForDigitsWhere(subtractDigits, (candidate) => candidate < total && total - candidate >= minimumRemainder);
+        if (value === null) {
+          const fallback = randomNumberForDigits(pickDigitsForVariant(bandRange, variant + index + 1));
+          total += fallback;
+          parts.push('+', String(fallback));
+          return;
+        }
+
+        total -= value;
+        parts.push('-', String(value));
+      });
+
+      return parts.join(' ');
+    };
 
     const chooseFamily = (level, selectedFamily) => {
       if (selectedFamily !== 'mixed') return selectedFamily;
@@ -412,37 +527,27 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       return band;
     };
 
-    const makeDynamicPrompt = (level, family, band, style) => {
+    const makeDynamicPrompt = (level, family, band, style, variant = 0) => {
       const adjustedBand = styleAdjustBand(style, band);
       const bandRange = parseBand(adjustedBand);
-      const randomNumberForBand = () => randomNumberForDigits(randomDigits(adjustedBand));
 
       if (family === 'sequence' || family === 'anzan') {
-        const a = randomNumberForBand();
-        const b = randomNumberForBand();
-        const c = randomNumberForBand();
-        const d = family === 'anzan' && level === 'L5' ? randomNumberForBand() : null;
-        return d ? `${a} + ${b} - ${c} + ${d}` : `${a} + ${b} - ${c}`;
+        return buildSequencePrompt(family, bandRange, variant);
       }
       const resolvedFamily = chooseFamily(level, family);
       const digits = randomDigits(adjustedBand);
       if (resolvedFamily === 'multiplication') {
-        const a = randomNumberForDigits(Math.min(level === 'L5' ? 3 : 2, digits));
-        const b = rand(2, level === 'L5' ? 12 : 9);
+        const a = randomNumberForDigits(Math.min(level === 'L5' ? 3 : 2, pickDigitsForVariant({ min: 1, max: digits }, variant)));
+        const b = variant % 2 === 0 ? rand(2, level === 'L5' ? 12 : 9) : rand(3, level === 'L5' ? 11 : 8);
         return `${a} × ${b}`;
       }
       if (resolvedFamily === 'division') {
-        const divisor = rand(2, level === 'L5' ? 12 : 9);
-        const quotient = randomNumberForDigits(Math.max(1, Math.min(level === 'L5' ? 3 : 2, digits)));
+        const divisor = variant % 2 === 0 ? rand(2, level === 'L5' ? 12 : 9) : rand(3, level === 'L5' ? 11 : 8);
+        const quotient = randomNumberForDigits(Math.max(1, Math.min(level === 'L5' ? 3 : 2, pickDigitsForVariant({ min: 1, max: digits }, variant + 1))));
         return `${divisor * quotient} ÷ ${divisor}`;
       }
-      const aDigits = digits;
-      const bDigits = rand(bandRange.min, aDigits);
-      const a = randomNumberForDigits(aDigits);
-      const bRaw = randomNumberForDigits(bDigits);
-      if (resolvedFamily === 'addition') return `${a} + ${bRaw}`;
-      const b = Math.min(bRaw, a);
-      return `${a} - ${b}`;
+      if (resolvedFamily === 'addition') return buildAdditionPrompt({ min: bandRange.min, max: digits }, variant);
+      return buildSubtractionPrompt({ min: bandRange.min, max: digits }, variant);
     };
 
     const buildUniquePrompts = (count, createPrompt) => {
@@ -486,9 +591,9 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
           : weakAreas.complements > weakAreas.arithmetic
             ? 'anzan'
             : families[0] || 'addition';
-        return buildUniquePrompts(count, () => makeDynamicPrompt(level, adaptiveFamily, band, style));
+        return buildUniquePrompts(count, (index) => makeDynamicPrompt(level, adaptiveFamily, band, style, index));
       }
-      return buildUniquePrompts(count, (index) => makeDynamicPrompt(level, families[index % Math.max(1, families.length)] || 'addition', band, style));
+      return buildUniquePrompts(count, (index) => makeDynamicPrompt(level, families[index % Math.max(1, families.length)] || 'addition', band, style, index));
     };
 
     const renderSheet = () => {
