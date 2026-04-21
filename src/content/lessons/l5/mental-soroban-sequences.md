@@ -59,14 +59,6 @@ Do not stack all the operations in your head at once.
 - Reacting to the next number before confirming the previous result.
 - Letting a subtraction force a full reset of the mental image.
 
-<LessonMiniCheck title="Mini checks for mental sequences">
-  <ul>
-    <li>In <strong>18 + 7 - 4 + 5</strong>, which total should be held before the final step?</li>
-    <li>Why is it safer to re-read <strong>21</strong> before adding <strong>5</strong>?</li>
-    <li>If you lose the total after a subtraction, what should you rebuild first?</li>
-  </ul>
-</LessonMiniCheck>
-
 ## Practice habit
 
 Work in short sequences first. Four calm steps are better training than ten rushed ones.

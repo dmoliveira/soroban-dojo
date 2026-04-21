@@ -68,14 +68,6 @@ This keeps division from becoming a vague guess.
 - Mixing up dividend and divisor.
 - Relying on the shape of the number instead of the factor relationship.
 
-<LessonMiniCheck title="Mini checks for quotient building">
-  <ul>
-    <li>In <strong>24 ÷ 6</strong>, what multiplication fact proves the answer?</li>
-    <li>In <strong>36 ÷ 9</strong>, why is the quotient not <strong>9</strong>?</li>
-    <li>When the quotient feels uncertain, what is the fastest safe check?</li>
-  </ul>
-</LessonMiniCheck>
-
 ## Practice habit
 
 Before doing larger division later, become reliable with exact fact families. Exact division is the training ground for calm quotient placement.

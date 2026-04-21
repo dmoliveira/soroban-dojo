@@ -1,9 +1,19 @@
 ---
 interface Props {
   title?: string;
+  prompt?: string;
+  answer?: string;
+  inputMode?: 'text' | 'numeric';
+  placeholder?: string;
 }
 
-const { title = 'Mini checks' } = Astro.props;
+const {
+  title = 'Mini checks',
+  prompt,
+  answer,
+  inputMode = 'text',
+  placeholder = inputMode === 'numeric' ? 'Write your answer' : 'Write your response',
+} = Astro.props;
 ---
 
 <section class="lesson-mini-check subtle-panel">
@@ -11,5 +21,42 @@ const { title = 'Mini checks' } = Astro.props;
   <h3>{title}</h3>
   <div class="lesson-mini-check-body">
     <slot />
+    {prompt && answer && (
+      <div class="lesson-mini-question" data-answer={answer} data-input-mode={inputMode}>
+        <p><strong>{prompt}</strong></p>
+        <div class="lesson-mini-question-row">
+          <input class="input lesson-mini-input" type="text" inputmode={inputMode} placeholder={placeholder} />
+          <button class="button button-secondary lesson-mini-verify" type="button">Check</button>
+        </div>
+        <p class="lesson-mini-feedback muted" aria-live="polite">Attempt first, then check.</p>
+      </div>
+    )}
   </div>
 </section>
+
+<script is:inline>
+  const normalizeMiniText = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+  document.currentScript?.previousElementSibling?.querySelector('.lesson-mini-verify')?.addEventListener('click', (event) => {
+    const card = event.currentTarget.closest('.lesson-mini-question');
+    const input = card?.querySelector('.lesson-mini-input');
+    const feedback = card?.querySelector('.lesson-mini-feedback');
+    if (!(card instanceof HTMLElement) || !(input instanceof HTMLInputElement) || !(feedback instanceof HTMLElement)) return;
+
+    const expected = card.dataset.answer || '';
+    const mode = card.dataset.inputMode || 'text';
+    const value = input.value.trim();
+    if (!value) {
+      feedback.textContent = 'Write an answer first.';
+      feedback.className = 'lesson-mini-feedback lesson-mini-feedback-warn';
+      return;
+    }
+
+    const correct = mode === 'numeric'
+      ? Number(value) === Number(expected)
+      : normalizeMiniText(value) === normalizeMiniText(expected);
+
+    feedback.textContent = correct ? 'Correct. Keep going.' : `Not yet. Expected idea: ${expected}`;
+    feedback.className = correct ? 'lesson-mini-feedback lesson-mini-feedback-ok' : 'lesson-mini-feedback lesson-mini-feedback-warn';
+  });
+</script>

@@ -20,6 +20,8 @@ const prerequisiteLesson = allLessons.find((entry) => lesson.data.prerequisites.
 const nextLessons = allLessons
   .filter((entry) => lesson.data.nextLessons.includes(entry.data.id))
   .sort((a, b) => lesson.data.nextLessons.indexOf(a.data.id) - lesson.data.nextLessons.indexOf(b.data.id));
+const recommendedNextLesson = nextLessons[0] ?? null;
+const recommendedExercise = relatedExercises[0] ?? null;
 const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 const worksheetPreset = lesson.data.level === 'L4' && lesson.data.skill === 'multiplication'
   ? 'multiplication-focus'
@@ -30,6 +32,74 @@ const worksheetPreset = lesson.data.level === 'L4' && lesson.data.skill === 'mul
       : lesson.data.skill === 'complements'
         ? 'complements'
         : null;
+const lessonMiniChecks = ({
+  'lesson-l4-001': {
+    title: 'Mini checks for first multiplication',
+    prompt: 'What is 3 × 4?',
+    answer: '12',
+    inputMode: 'numeric',
+    items: [
+      'If each group is 4 and you need 3 groups, what totals should you read after each step?',
+      'Which feels cleaner to you on the soroban: 3 × 4 or 4 × 3?',
+      'If the multiplier becomes larger, what becomes more important: speed or stable re-reading?',
+    ],
+  },
+  'lesson-l4-005': {
+    title: 'Mini checks for place shifts',
+    prompt: 'What is 12 × 3?',
+    answer: '36',
+    inputMode: 'numeric',
+    items: [
+      'In 13 × 5, which partial product should you think first?',
+      'Why is 10 × 4 not the same kind of result as 4 × 4?',
+      'If the tens place product is already correct, what should the ones place addition avoid changing?',
+    ],
+  },
+  'lesson-l4-002': {
+    title: 'Mini checks for first division',
+    prompt: 'What is 12 ÷ 3?',
+    answer: '4',
+    inputMode: 'numeric',
+    items: [
+      'In 12 ÷ 3, what multiplication fact should appear immediately?',
+      'In 12 ÷ 4, why is 3 the quotient instead of 4?',
+      'Which is more stable for you right now: equal groups or missing-factor thinking?',
+    ],
+  },
+  'lesson-l4-006': {
+    title: 'Mini checks for quotient building',
+    prompt: 'What is 24 ÷ 6?',
+    answer: '4',
+    inputMode: 'numeric',
+    items: [
+      'In 24 ÷ 6, what multiplication fact proves the answer?',
+      'In 36 ÷ 9, why is the quotient not 9?',
+      'When the quotient feels uncertain, what is the fastest safe check?',
+    ],
+  },
+  'lesson-l5-001': {
+    title: 'Mini checks for mental sequences',
+    prompt: 'What is 18 + 7 - 4 + 5?',
+    answer: '26',
+    inputMode: 'numeric',
+    items: [
+      'In 18 + 7 - 4 + 5, which total should be held before the final step?',
+      'Why is it safer to re-read 21 before adding 5?',
+      'If you lose the total after a subtraction, what should you rebuild first?',
+    ],
+  },
+  'lesson-l5-002': {
+    title: 'Mini checks for speed control',
+    prompt: 'What is 74 + 8 - 3 + 12?',
+    answer: '91',
+    inputMode: 'numeric',
+    items: [
+      'After 74 + 8, what total must stay clear before the subtraction begins?',
+      'Why is 79 the most important checkpoint in the worked example?',
+      'When the rhythm feels unstable, what should you protect first: speed or the full running total?',
+    ],
+  },
+} as const)[lesson.data.id] ?? null;
 const bestFor = lesson.data.skill === 'abacus-orientation'
   ? 'Best for first contact with the soroban, naming the parts, and building calm familiarity.'
   : lesson.data.skill === 'number-reading' || lesson.data.skill === 'place-value'
@@ -88,6 +158,14 @@ const bestFor = lesson.data.skill === 'abacus-orientation'
           <button class="button button-secondary lesson-complete-toggle" data-lesson-id={lesson.data.id}>Mark lesson complete</button>
           <a class="button button-secondary" href={`${base}progress`}>View progress</a>
         </div>
+        <div id="lesson-complete-next" class="lesson-complete-next subtle-panel" hidden>
+          <strong>Completed. Continue with the next move.</strong>
+          <div class="button-row lesson-complete-actions">
+            {recommendedNextLesson && <a class="button button-secondary" href={`${base}lessons/${recommendedNextLesson.slug}`}>Next lesson</a>}
+            {recommendedExercise && <a class="button button-secondary" href={`${base}exercises/${recommendedExercise.slug}`}>Next exercise</a>}
+            <a class="button button-secondary" href={worksheetPreset ? `${base}worksheets?preset=${worksheetPreset}` : `${base}worksheets`}>Matching worksheet</a>
+          </div>
+        </div>
       </section>
       <section id="lesson-objectives" class="subtle-panel lesson-summary-panel">
         <p class="eyebrow">Objectives</p>
@@ -104,6 +182,13 @@ const bestFor = lesson.data.skill === 'abacus-orientation'
     <div id="lesson-content">
       <Content components={{ LessonMiniCheck }} />
     </div>
+    {lessonMiniChecks && (
+      <LessonMiniCheck title={lessonMiniChecks.title} prompt={lessonMiniChecks.prompt} answer={lessonMiniChecks.answer} inputMode={lessonMiniChecks.inputMode}>
+        <ul>
+          {lessonMiniChecks.items.map((item) => <li>{item}</li>)}
+        </ul>
+      </LessonMiniCheck>
+    )}
     <section id="lesson-next" class="panel lesson-next-panel">
       <p class="eyebrow">Next step</p>
       <h2>Continue with guided practice</h2>
@@ -156,6 +241,7 @@ const bestFor = lesson.data.skill === 'abacus-orientation'
   <script is:inline define:vars={{ lessonId: lesson.data.id }}>
     const lessonKey = 'soroban-dojo:completed-lessons';
     const button = document.querySelector('.lesson-complete-toggle');
+    const nextPanel = document.getElementById('lesson-complete-next');
     const readLessons = () => {
       try {
         return JSON.parse(localStorage.getItem(lessonKey) || '[]');
@@ -168,6 +254,7 @@ const bestFor = lesson.data.skill === 'abacus-orientation'
       const done = current.includes(lessonId);
       button.textContent = done ? 'Lesson completed' : 'Mark lesson complete';
       button.setAttribute('aria-pressed', String(done));
+      if (nextPanel) nextPanel.hidden = !done;
     };
     button?.addEventListener('click', () => {
       const current = readLessons();

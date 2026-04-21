@@ -57,14 +57,6 @@ Use one short safety check after each move:
 - Only hearing the last digit and forgetting the whole number.
 - Continuing after a suspected drift instead of checking immediately.
 
-<LessonMiniCheck title="Mini checks for speed control">
-  <ul>
-    <li>After <strong>74 + 8</strong>, what total must stay clear before the subtraction begins?</li>
-    <li>Why is <strong>79</strong> the most important checkpoint in the worked example?</li>
-    <li>When the rhythm feels unstable, what should you protect first: speed or the full running total?</li>
-  </ul>
-</LessonMiniCheck>
-
 ## Practice habit
 
 Use timed worksheets only after you can keep the running total stable in untimed sets. Speed should reveal structure, not destroy it.
