@@ -1,0 +1,15 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = 'Mini checks' } = Astro.props;
+---
+
+<section class="lesson-mini-check subtle-panel">
+  <p class="eyebrow">Quick check</p>
+  <h3>{title}</h3>
+  <div class="lesson-mini-check-body">
+    <slot />
+  </div>
+</section>

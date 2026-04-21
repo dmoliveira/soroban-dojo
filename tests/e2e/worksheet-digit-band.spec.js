@@ -35,3 +35,13 @@ test('worksheet preset query opens focused multiplication drills', async ({ page
   expect(prompts.length).toBeGreaterThan(0);
   prompts.forEach((prompt) => expect(prompt).toContain('×'));
 });
+
+test('curriculum mastery worksheet link opens anzan-focused sheet', async ({ page }) => {
+  await page.goto('/ai-soroban/curriculum');
+
+  await page.getByRole('link', { name: 'Anzan worksheet' }).click();
+
+  await expect(page).toHaveURL(/preset=anzan-focus/);
+  await expect(page.locator('#worksheet-level')).toHaveValue('L5');
+  await expect(page.locator('input[name="worksheet-family"][value="anzan"]')).toBeChecked();
+});

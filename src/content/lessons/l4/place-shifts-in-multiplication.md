@@ -75,11 +75,13 @@ This is a good example because the second part is larger, but it still belongs a
 - Adding the ones product first and then disturbing it while placing tens.
 - Treating `12 × 3` like `1 × 3` and `2 × 3` without restoring the ten.
 
-## Mini checks
-
-- In **13 × 5**, which partial product should you think first?
-- Why is **10 × 4** not the same kind of result as **4 × 4**?
-- If the tens place product is already correct, what should the ones place addition avoid changing?
+<LessonMiniCheck title="Mini checks for place shifts">
+  <ul>
+    <li>In <strong>13 × 5</strong>, which partial product should you think first?</li>
+    <li>Why is <strong>10 × 4</strong> not the same kind of result as <strong>4 × 4</strong>?</li>
+    <li>If the tens place product is already correct, what should the ones place addition avoid changing?</li>
+  </ul>
+</LessonMiniCheck>
 
 ## Practice habit
 

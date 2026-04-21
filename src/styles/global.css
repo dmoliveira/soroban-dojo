@@ -261,8 +261,14 @@ a { color: inherit; text-decoration: none; }
 .lesson-nav-strip { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.25rem 0 0.45rem; }
 .lesson-nav-strip a { padding: 0.26rem 0.56rem; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.66); color: var(--muted); font-size: 0.8rem; }
 .lesson-flow-strip { margin: 0.3rem 0 0.45rem; }
+.lesson-nav-grid { margin: 1rem 0 1.2rem; }
 .lesson-summary-panel p { margin: 0; }
 .lesson-summary-panel ul { margin: 0; padding-left: 1.15rem; }
+.lesson-mini-check { margin: 1rem 0; background: linear-gradient(180deg, rgba(255,255,255,0.76), rgba(234,211,204,0.32)); }
+.lesson-mini-check h3 { margin: 0.1rem 0 0.45rem; }
+.lesson-mini-check-body > :first-child { margin-top: 0; }
+.lesson-mini-check-body ul { margin: 0; padding-left: 1.15rem; }
+.lesson-mini-check-body p { margin: 0.3rem 0; }
 .exercise-page-panel h1 { margin-bottom: 0.45rem; }
 .exercise-page-panel .meta-row { margin: 0.25rem 0 0.45rem; }
 .exercise-utility-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0.15rem 0 0.4rem; }

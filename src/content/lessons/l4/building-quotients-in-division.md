@@ -68,11 +68,13 @@ This keeps division from becoming a vague guess.
 - Mixing up dividend and divisor.
 - Relying on the shape of the number instead of the factor relationship.
 
-## Mini checks
-
-- In **24 ÷ 6**, what multiplication fact proves the answer?
-- In **36 ÷ 9**, why is the quotient not **9**?
-- When the quotient feels uncertain, what is the fastest safe check?
+<LessonMiniCheck title="Mini checks for quotient building">
+  <ul>
+    <li>In <strong>24 ÷ 6</strong>, what multiplication fact proves the answer?</li>
+    <li>In <strong>36 ÷ 9</strong>, why is the quotient not <strong>9</strong>?</li>
+    <li>When the quotient feels uncertain, what is the fastest safe check?</li>
+  </ul>
+</LessonMiniCheck>
 
 ## Practice habit
 

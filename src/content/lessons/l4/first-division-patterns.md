@@ -62,11 +62,13 @@ This is why multiplication practice supports division so strongly.
 - Forgetting to check the quotient with multiplication.
 - Reading the dividend correctly but placing attention on the wrong factor.
 
-## Mini checks
-
-- In **12 ÷ 3**, what multiplication fact should appear immediately?
-- In **12 ÷ 4**, why is **3** the quotient instead of **4**?
-- Which is more stable for you right now: equal groups or missing-factor thinking?
+<LessonMiniCheck title="Mini checks for first division">
+  <ul>
+    <li>In <strong>12 ÷ 3</strong>, what multiplication fact should appear immediately?</li>
+    <li>In <strong>12 ÷ 4</strong>, why is <strong>3</strong> the quotient instead of <strong>4</strong>?</li>
+    <li>Which is more stable for you right now: equal groups or missing-factor thinking?</li>
+  </ul>
+</LessonMiniCheck>
 
 ## Transition to the next lesson
 

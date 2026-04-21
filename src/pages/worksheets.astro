@@ -15,8 +15,12 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       <button class="button button-secondary preset-button" data-preset="review">Review</button>
       <button class="button button-secondary preset-button" data-preset="speed">Speed</button>
       <button class="button button-secondary preset-button" data-preset="exam">Exam</button>
+      <button class="button button-secondary preset-button" data-preset="foundations-focus">Foundations</button>
+      <button class="button button-secondary preset-button" data-preset="one-rod-focus">One-rod</button>
+      <button class="button button-secondary preset-button" data-preset="mixed-fluency">Mixed fluency</button>
       <button class="button button-secondary preset-button" data-preset="multiplication-focus">Multiplication</button>
       <button class="button button-secondary preset-button" data-preset="division-focus">Division</button>
+      <button class="button button-secondary preset-button" data-preset="anzan-focus">Anzan</button>
       <button class="button button-secondary preset-button" data-preset="carry">Carry</button>
       <button class="button button-secondary preset-button" data-preset="borrow">Borrow</button>
       <button class="button button-secondary preset-button" data-preset="complements">Complements</button>
@@ -221,12 +225,16 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 
     const presets = {
       warmup: { mode: 'fixed', level: 'L0', families: ['addition', 'subtraction'], band: '1', style: 'practice', orientation: 'ledger', count: '20' },
+      'foundations-focus': { mode: 'fixed', level: 'L0', families: ['addition', 'subtraction'], band: '1', style: 'practice', orientation: 'ledger', count: '20' },
+      'one-rod-focus': { mode: 'fixed', level: 'L1', families: ['addition', 'subtraction'], band: '2', style: 'practice', orientation: 'ledger', count: '20' },
       practice: { mode: 'dynamic', level: 'L2', families: ['mixed', 'sequence'], band: '2-3', style: 'practice', orientation: 'vertical', count: '40' },
+      'mixed-fluency': { mode: 'dynamic', level: 'L3', families: ['mixed', 'sequence'], band: '3-4', style: 'practice', orientation: 'vertical', count: '40' },
       review: { mode: 'adaptive', level: 'L2', families: ['mixed', 'sequence'], band: '2-3', style: 'review', orientation: 'vertical', count: '40' },
       speed: { mode: 'dynamic', level: 'L3', families: ['addition', 'subtraction'], band: '2-3', style: 'speed', orientation: 'ledger', count: '60' },
       exam: { mode: 'dynamic', level: 'L4', families: ['multiplication', 'division', 'sequence'], band: '3-4', style: 'exam', orientation: 'vertical', count: '40' },
       'multiplication-focus': { mode: 'dynamic', level: 'L4', families: ['multiplication'], band: '2-4', style: 'practice', orientation: 'ledger', count: '40' },
       'division-focus': { mode: 'dynamic', level: 'L4', families: ['division'], band: '2-4', style: 'review', orientation: 'ledger', count: '40' },
+      'anzan-focus': { mode: 'dynamic', level: 'L5', families: ['anzan', 'sequence'], band: '4-6', style: 'review', orientation: 'vertical', count: '40' },
       carry: { mode: 'dynamic', level: 'L2', families: ['addition'], band: '2-3', style: 'practice', orientation: 'vertical', count: '40' },
       borrow: { mode: 'dynamic', level: 'L2', families: ['subtraction'], band: '2-3', style: 'practice', orientation: 'vertical', count: '40' },
       complements: { mode: 'dynamic', level: 'L2', families: ['anzan'], band: '2-3', style: 'review', orientation: 'ledger', count: '40' },

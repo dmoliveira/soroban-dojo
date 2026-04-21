@@ -77,11 +77,13 @@ This matters because multiplication is not only about the answer. It is also abo
 - Treating the two factors as identical jobs instead of `group size` and `group count`.
 - Looking only at the final answer instead of the movement pattern.
 
-## Mini checks
-
-- If each group is **4** and you need **3** groups, what totals should you read after each step?
-- Which feels cleaner to you on the soroban: **3 × 4** or **4 × 3**?
-- If the multiplier becomes larger, what becomes more important: speed or stable re-reading?
+<LessonMiniCheck title="Mini checks for first multiplication">
+  <ul>
+    <li>If each group is <strong>4</strong> and you need <strong>3</strong> groups, what totals should you read after each step?</li>
+    <li>Which feels cleaner to you on the soroban: <strong>3 × 4</strong> or <strong>4 × 3</strong>?</li>
+    <li>If the multiplier becomes larger, what becomes more important: speed or stable re-reading?</li>
+  </ul>
+</LessonMiniCheck>
 
 ## Transition to the next lesson
 

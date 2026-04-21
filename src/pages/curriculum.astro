@@ -16,6 +16,7 @@ const stages = [
       { label: 'Place Value on Two Rods', href: `${base}lessons/l0/place-value-on-two-rods` },
     ],
     action: { label: 'Open Foundations', href: `${base}levels/l0` },
+    worksheet: { label: 'Foundations worksheet', href: `${base}worksheets?preset=foundations-focus` },
   },
   {
     eyebrow: 'Stage 2',
@@ -29,6 +30,7 @@ const stages = [
       { label: 'First Subtraction on One Rod', href: `${base}lessons/l1/first-subtraction-on-one-rod` },
     ],
     action: { label: 'Open Beginner Level', href: `${base}levels/l1` },
+    worksheet: { label: 'One-rod worksheet', href: `${base}worksheets?preset=one-rod-focus` },
   },
   {
     eyebrow: 'Stage 3',
@@ -41,6 +43,7 @@ const stages = [
       { label: 'Complements to Ten', href: `${base}lessons/l2/complements-to-ten` },
     ],
     action: { label: 'Open Basic Operations', href: `${base}levels/l2` },
+    worksheet: { label: 'Complements worksheet', href: `${base}worksheets?preset=complements` },
   },
   {
     eyebrow: 'Stage 4',
@@ -52,6 +55,7 @@ const stages = [
       { label: 'Mixed Two-Digit Fluency', href: `${base}lessons/l3/mixed-two-digit-fluency` },
     ],
     action: { label: 'Open Intermediate Level', href: `${base}levels/l3` },
+    worksheet: { label: 'Mixed fluency worksheet', href: `${base}worksheets?preset=mixed-fluency` },
   },
   {
     eyebrow: 'Stage 5',
@@ -64,6 +68,7 @@ const stages = [
       { label: 'Place Shifts in Multiplication', href: `${base}lessons/l4/place-shifts-in-multiplication` },
     ],
     action: { label: 'Open Multiplication Track', href: `${base}levels/l4` },
+    worksheet: { label: 'Multiplication worksheet', href: `${base}worksheets?preset=multiplication-focus` },
   },
   {
     eyebrow: 'Stage 6',
@@ -76,6 +81,7 @@ const stages = [
       { label: 'Building Quotients in Division', href: `${base}lessons/l4/building-quotients-in-division` },
     ],
     action: { label: 'Open Division Track', href: `${base}levels/l4` },
+    worksheet: { label: 'Division worksheet', href: `${base}worksheets?preset=division-focus` },
   },
   {
     eyebrow: 'Stage 7',
@@ -84,10 +90,11 @@ const stages = [
     theory: ['Mental soroban / anzan', 'Pattern compression', 'Speed without panic', 'Mixed review and error correction'],
     practice: ['Sequence worksheets', 'Adaptive practice', 'Timed drills', 'Mistake review'],
     lessons: [
-      { label: 'Practice Mode', href: `${base}practice` },
-      { label: 'Worksheet Mode', href: `${base}worksheets` },
+      { label: 'Mental Soroban Sequences', href: `${base}lessons/l5/mental-soroban-sequences` },
+      { label: 'Speed Rhythm and Error Checking', href: `${base}lessons/l5/speed-rhythm-and-error-checking` },
     ],
-    action: { label: 'Open Practice', href: `${base}practice` },
+    action: { label: 'Open Mastery Level', href: `${base}levels/l5` },
+    worksheet: { label: 'Anzan worksheet', href: `${base}worksheets?preset=anzan-focus` },
   },
 ];
 ---
@@ -126,6 +133,7 @@ const stages = [
         </ul>
         <div class="button-row">
           <a class="button button-secondary" href={stage.action.href}>{stage.action.label}</a>
+          <a class="button button-secondary" href={stage.worksheet.href}>{stage.worksheet.label}</a>
         </div>
       </article>
     ))}

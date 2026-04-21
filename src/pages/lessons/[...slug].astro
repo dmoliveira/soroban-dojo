@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import LessonMiniCheck from '../../components/LessonMiniCheck.astro';
 import SorobanVisualizer from '../../components/SorobanVisualizer.astro';
 import { numberToKanji } from '../../lib/japanese';
 
@@ -24,9 +25,11 @@ const worksheetPreset = lesson.data.level === 'L4' && lesson.data.skill === 'mul
   ? 'multiplication-focus'
   : lesson.data.level === 'L4' && lesson.data.skill === 'division'
     ? 'division-focus'
-    : lesson.data.skill === 'complements'
-      ? 'complements'
-      : null;
+    : lesson.data.level === 'L5'
+      ? 'anzan-focus'
+      : lesson.data.skill === 'complements'
+        ? 'complements'
+        : null;
 const bestFor = lesson.data.skill === 'abacus-orientation'
   ? 'Best for first contact with the soroban, naming the parts, and building calm familiarity.'
   : lesson.data.skill === 'number-reading' || lesson.data.skill === 'place-value'
@@ -99,7 +102,7 @@ const bestFor = lesson.data.skill === 'abacus-orientation'
       </div>
     )}
     <div id="lesson-content">
-      <Content />
+      <Content components={{ LessonMiniCheck }} />
     </div>
     <section id="lesson-next" class="panel lesson-next-panel">
       <p class="eyebrow">Next step</p>
