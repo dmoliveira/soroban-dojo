@@ -47,6 +47,7 @@ const { lessons, exercises } = Astro.props;
   const base = '/ai-soroban/';
   const exerciseKey = 'soroban-dojo:exercise-states';
   const lessonKey = 'soroban-dojo:completed-lessons';
+  const weeklyPlanKey = 'soroban-dojo:weekly-study-plan';
 
   const read = (key, fallback) => {
     try {
@@ -114,12 +115,35 @@ const { lessons, exercises } = Astro.props;
   const lesson = lessons.find((entry) => entry.id === plan.lesson) || lessons[0];
   const exercise = exercises.find((entry) => entry.id === plan.exercise) || exercises[0];
 
+  const readPlanState = () => {
+    try {
+      return JSON.parse(localStorage.getItem(weeklyPlanKey) || '{}');
+    } catch {
+      return {};
+    }
+  };
+
+  const writePlanState = (state) => localStorage.setItem(weeklyPlanKey, JSON.stringify(state));
+
+  const currentPlanState = readPlanState();
+  const normalizedPlanState = currentPlanState.target === target
+    ? currentPlanState
+    : {
+        target,
+        title: plan.title,
+        lesson: { id: plan.lesson, done: false },
+        exercise: { id: plan.exercise, done: false },
+        worksheet: { href: plan.worksheet, done: false },
+      };
+  writePlanState(normalizedPlanState);
+
   document.getElementById('weekly-plan-title').textContent = plan.title;
   document.getElementById('weekly-plan-copy').textContent = plan.copy;
 
   const cards = [
     {
       eyebrow: 'Day 1-2',
+      key: 'lesson',
       title: lesson?.title || 'Lesson review',
       copy: completedLessons.includes(lesson?.id) ? 'You already completed this lesson once. Re-read it quickly, then move straight into the exercise.' : 'Start with the concept explanation and worked example before drilling.',
       href: `${base}lessons/${lesson?.slug}`,
@@ -127,6 +151,7 @@ const { lessons, exercises } = Astro.props;
     },
     {
       eyebrow: 'Day 3-4',
+      key: 'exercise',
       title: exercise?.title || 'Exercise review',
       copy: 'Attempt the exercise first, then use the hint or reveal only if the structure is still unclear.',
       href: `${base}exercises/${exercise?.slug}`,
@@ -134,6 +159,7 @@ const { lessons, exercises } = Astro.props;
     },
     {
       eyebrow: 'Day 5-7',
+      key: 'worksheet',
       title: 'Focused worksheet set',
       copy: 'Use a printable or on-screen sheet that matches the same weak area and submode.',
       href: plan.worksheet,
@@ -145,7 +171,22 @@ const { lessons, exercises } = Astro.props;
   cards.forEach((card) => {
     const article = document.createElement('article');
     article.className = 'subtle-panel weekly-plan-card';
-    article.innerHTML = `<p class="eyebrow">${card.eyebrow}</p><h3>${card.title}</h3><p class="muted">${card.copy}</p><a class="button button-secondary" href="${card.href}">${card.label}</a>`;
+    const done = normalizedPlanState[card.key]?.done;
+    article.innerHTML = `<p class="eyebrow">${card.eyebrow}</p><h3>${card.title}</h3><p class="muted">${card.copy}</p><div class="button-row button-row-compact"><a class="button button-secondary" href="${card.href}">${card.label}</a><button class="button button-secondary weekly-plan-toggle" type="button" data-step="${card.key}">${done ? 'Mark pending' : 'Mark done'}</button></div><p class="muted small weekly-plan-status">${done ? 'Completed for this week.' : 'Still active in this week\'s plan.'}</p>`;
     grid.appendChild(article);
+  });
+
+  grid.querySelectorAll('.weekly-plan-toggle').forEach((button) => {
+    button.addEventListener('click', () => {
+      const state = readPlanState();
+      const step = button.dataset.step;
+      if (!step) return;
+      state[step] = { ...(state[step] || {}), done: !state[step]?.done };
+      writePlanState(state);
+      const status = button.closest('.weekly-plan-card')?.querySelector('.weekly-plan-status');
+      const done = state[step]?.done;
+      button.textContent = done ? 'Mark pending' : 'Mark done';
+      if (status) status.textContent = done ? 'Completed for this week.' : 'Still active in this week\'s plan.';
+    });
   });
 </script>
