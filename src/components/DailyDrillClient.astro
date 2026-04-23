@@ -1,4 +1,4 @@
-<section class="panel">
+<section class="panel daily-drill-panel">
   <div class="section-head">
     <div>
       <p class="eyebrow">Daily drill pack · 日々の修練</p>
@@ -6,7 +6,7 @@
     </div>
     <span class="badge">Fresh each day</span>
   </div>
-  <p class="muted">This pack changes by day and level so learners can return to a fresh but stable set. Print it or solve it on screen.</p>
+  <p id="daily-drill-copy" class="muted">This pack now adapts to weak areas and unfinished weekly-plan steps so today’s work stays practical.</p>
 
   <div class="practice-grid">
     <div class="stack-sm">
@@ -28,6 +28,17 @@
     <div class="subtle-panel">
       <p class="eyebrow">Pack identity</p>
       <div id="daily-pack-id" class="muted">Daily pack ID will appear here.</div>
+      <div id="daily-drill-focus" class="muted small">Adaptive focus will appear here.</div>
+    </div>
+  </div>
+
+  <div class="subtle-panel daily-drill-guidance">
+    <strong id="daily-guidance-title">Today’s route</strong>
+    <p id="daily-guidance-copy" class="muted small">Finish the unfinished weekly-plan step first, then use the supporting drills below.</p>
+    <div class="button-row button-row-compact">
+      <a class="button button-secondary" id="daily-link-lesson" href="/ai-soroban/lessons">Lesson step</a>
+      <a class="button button-secondary" id="daily-link-exercise" href="/ai-soroban/exercises">Exercise step</a>
+      <a class="button button-secondary" id="daily-link-worksheet" href="/ai-soroban/worksheets">Worksheet step</a>
     </div>
   </div>
 
@@ -35,40 +46,117 @@
 </section>
 
 <script is:inline>
-  const banks = {
-    L0: [
-      () => { const a = Math.floor(Math.random() * 5); const b = Math.floor(Math.random() * 5); return { prompt: `Read ${a} tens and ${b} ones.`, answer: a * 10 + b }; },
-      () => { const value = Math.floor(Math.random() * 9); return { prompt: `Show the digit ${value} on one rod.`, answer: value }; },
-    ],
-    L1: [
-      () => { const a = Math.floor(Math.random() * 8) + 1; const b = Math.floor(Math.random() * (9 - a)) + 1; return { prompt: `${a} + ${b}`, answer: a + b }; },
-      () => { const a = Math.floor(Math.random() * 8) + 2; const b = Math.floor(Math.random() * (a - 1)) + 1; return { prompt: `${a} - ${b}`, answer: a - b }; },
-    ],
-    L2: [
-      () => { const a = Math.floor(Math.random() * 8) + 1; return { prompt: `What completes ${a} to 10?`, answer: 10 - a }; },
-      () => { const a = Math.floor(Math.random() * 4) + 1; return { prompt: `What completes ${a} to 5?`, answer: 5 - a }; },
-    ],
-    L3: [
-      () => { const a = 20 + Math.floor(Math.random() * 20); const b = Math.floor(Math.random() * 9) + 1; const c = Math.floor(Math.random() * 4) + 1; return { prompt: `${a} + ${b} - ${c}`, answer: a + b - c }; },
-      () => { const a = 30 + Math.floor(Math.random() * 20); const b = 10 + Math.floor(Math.random() * 9); return { prompt: `${a} - ${b}`, answer: a - b }; },
-    ],
-    L4: [
-      () => { const a = Math.floor(Math.random() * 4) + 2; const b = Math.floor(Math.random() * 4) + 2; return { prompt: `${a} × ${b}`, answer: a * b }; },
-      () => { const divisor = Math.floor(Math.random() * 3) + 2; const quotient = Math.floor(Math.random() * 4) + 2; return { prompt: `${divisor * quotient} ÷ ${divisor}`, answer: quotient }; },
-    ],
+  const base = '/ai-soroban/';
+  const exerciseKey = 'soroban-dojo:exercise-states';
+  const weeklyPlanKey = 'soroban-dojo:weekly-study-plan';
+
+  const read = (key, fallback) => {
+    try {
+      return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+    } catch {
+      return fallback;
+    }
+  };
+
+  const planState = read(weeklyPlanKey, {});
+  const exerciseStates = read(exerciseKey, {});
+  const weakness = Object.values(exerciseStates).reduce((acc, entry) => {
+    if (entry?.status !== 'needs-review') return acc;
+    const skill = entry.skill || '';
+    if (skill === 'division') acc.division += 1;
+    else if (skill === 'multiplication') acc.multiplication += 1;
+    else if (skill === 'complements') acc.complements += 1;
+    else if (skill === 'anzan' || skill === 'mastery') acc.mental += 1;
+    else acc.arithmetic += 1;
+    return acc;
+  }, { arithmetic: 0, complements: 0, multiplication: 0, division: 0, mental: 0 });
+
+  const target = planState.target || ['mental', 'division', 'multiplication', 'complements', 'arithmetic'].sort((a, b) => weakness[b] - weakness[a])[0];
+
+  const packs = {
+    arithmetic: {
+      title: 'Arithmetic rhythm today',
+      copy: 'Finish the arithmetic step you left open, then steady the running total with short mixed drills.',
+      level: 'L3',
+      lesson: `${base}lessons/l3/mixed-two-digit-fluency`,
+      exercise: `${base}exercises/l3/mixed-two-digit-sequence`,
+      worksheet: `${base}worksheets?preset=mixed-fluency&submode=arithmetic-rhythm`,
+      drills: [
+        () => { const a = 24; const b = 7; const c = 1; return { prompt: `${a} + ${b} + ${c}`, answer: a + b + c }; },
+        () => { const a = 38; const b = 12; return { prompt: `${a} - ${b}`, answer: a - b }; },
+      ],
+    },
+    complements: {
+      title: 'Complements today',
+      copy: 'Return to complement pairs first, then use the worksheet when the missing-part pattern is stable again.',
+      level: 'L2',
+      lesson: `${base}lessons/l2/complements-to-ten`,
+      exercise: `${base}exercises/l2/use-complement-to-ten`,
+      worksheet: `${base}worksheets?preset=complements&submode=complement-balance`,
+      drills: [
+        () => { const a = 7; return { prompt: `What completes ${a} to 10?`, answer: 10 - a }; },
+        () => { const a = 3; return { prompt: `What completes ${a} to 5?`, answer: 5 - a }; },
+      ],
+    },
+    multiplication: {
+      title: 'Multiplication structure today',
+      copy: 'Use the unfinished multiplication step first, then reinforce it with place-shift drills.',
+      level: 'L4',
+      lesson: `${base}lessons/l4/place-shifts-in-multiplication`,
+      exercise: `${base}exercises/l4/twelve-times-three`,
+      worksheet: `${base}worksheets?preset=multiplication-focus&submode=place-shifts`,
+      drills: [
+        () => { const a = 12; const b = 3; return { prompt: `${a} × ${b}`, answer: a * b }; },
+        () => { const a = 14; const b = 4; return { prompt: `${a} × ${b}`, answer: a * b }; },
+      ],
+    },
+    division: {
+      title: 'Division quotient today',
+      copy: 'Open the unfinished quotient step first, then use exact division facts to keep the factor search clean.',
+      level: 'L4',
+      lesson: `${base}lessons/l4/building-quotients-in-division`,
+      exercise: `${base}exercises/l4/twenty-four-divided-by-six`,
+      worksheet: `${base}worksheets?preset=division-focus&submode=quotient-building`,
+      drills: [
+        () => { const divisor = 6; const quotient = 4; return { prompt: `${divisor * quotient} ÷ ${divisor}`, answer: quotient }; },
+        () => { const divisor = 9; const quotient = 4; return { prompt: `${divisor * quotient} ÷ ${divisor}`, answer: quotient }; },
+      ],
+    },
+    mental: {
+      title: 'Mental stability today',
+      copy: 'Finish the unfinished mental step first, then hold short totals through sign changes without rushing.',
+      level: 'L5',
+      lesson: `${base}lessons/l5/mental-soroban-sequences`,
+      exercise: `${base}exercises/l5/three-step-anzan-sequence`,
+      worksheet: `${base}worksheets?preset=anzan-focus&submode=anzan-recall`,
+      drills: [
+        () => ({ prompt: '18 + 7 - 4 + 5', answer: 26 }),
+        () => ({ prompt: '42 - 9 + 16 - 3', answer: 46 }),
+      ],
+    },
   };
 
   const byId = (id) => document.getElementById(id);
-  const makeSeed = (level) => `${level}-${new Date().toISOString().slice(0, 10)}`;
+  const activePack = packs[target] || packs.arithmetic;
+  const unfinishedStep = ['lesson', 'exercise', 'worksheet'].find((step) => !planState[step]?.done) || 'lesson';
+  const makeSeed = (level) => `${level}-${target}-${new Date().toISOString().slice(0, 10)}`;
 
   const renderPack = () => {
-    const level = byId('daily-level').value;
+    const level = activePack.level;
+    byId('daily-level').value = level;
     const seed = makeSeed(level);
     byId('daily-pack-id').textContent = `Pack ${seed}`;
+    byId('daily-drill-focus').textContent = `Adaptive focus: ${target} · First unfinished step: ${unfinishedStep}`;
+    byId('daily-guidance-title').textContent = activePack.title;
+    byId('daily-guidance-copy').textContent = activePack.copy;
+    byId('daily-link-lesson').href = activePack.lesson;
+    byId('daily-link-exercise').href = activePack.exercise;
+    byId('daily-link-worksheet').href = activePack.worksheet;
+    byId('daily-drill-copy').textContent = `This pack is centered on ${target} work and starts by pointing you back to the unfinished ${unfinishedStep} step from your weekly plan.`;
     const list = byId('daily-drill-list');
     list.replaceChildren();
     Array.from({ length: 8 }, (_, index) => {
-      const itemFactory = banks[level][index % banks[level].length];
+      const itemFactory = activePack.drills[index % activePack.drills.length];
       const item = itemFactory();
       const li = document.createElement('li');
       const strong = document.createElement('strong');

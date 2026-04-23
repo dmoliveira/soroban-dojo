@@ -43,3 +43,13 @@ test('weekly study plan adapts to multiplication weakness', async ({ page }) => 
   await expect(page.locator('#weekly-plan-title')).toContainText('Multiplication structure week');
   await expect(page.getByRole('link', { name: 'Open worksheet' }).last()).toHaveAttribute('href', /submode=place-shifts/);
 });
+
+test('weekly study plan steps can be marked done', async ({ page }) => {
+  await page.goto('/ai-soroban/study-plan');
+
+  const firstToggle = page.locator('.weekly-plan-toggle').first();
+  await firstToggle.click();
+
+  await expect(page.getByText('Completed for this week.').first()).toBeVisible();
+  await expect(firstToggle).toContainText('Mark pending');
+});
