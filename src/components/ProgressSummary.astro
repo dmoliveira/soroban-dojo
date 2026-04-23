@@ -91,6 +91,12 @@ const { lessons, exercises } = Astro.props;
   </section>
 
   <section class="panel ink-panel">
+    <p class="eyebrow">Worksheet submodes</p>
+    <h3>Mastery by worksheet focus</h3>
+    <div id="worksheet-focus-map" class="skill-map"></div>
+  </section>
+
+  <section class="panel ink-panel">
     <p class="eyebrow">Today’s reflection</p>
     <div class="reflection-grid">
       <div>
@@ -108,7 +114,8 @@ const { lessons, exercises } = Astro.props;
   const lessonKey = 'soroban-dojo:completed-lessons';
   const exerciseKey = 'soroban-dojo:exercise-states';
   const timerKey = 'soroban-dojo:timer-history';
-  const sessionKey = 'soroban-dojo:practice-sessions';
+   const sessionKey = 'soroban-dojo:practice-sessions';
+   const worksheetKey = 'soroban-dojo:worksheet-sessions';
   const lessonMeta = JSON.parse(root?.dataset.lessons || '[]');
   const exerciseMeta = JSON.parse(root?.dataset.exercises || '[]');
 
@@ -123,7 +130,8 @@ const { lessons, exercises } = Astro.props;
   const lessonData = read(lessonKey, []);
   const exerciseData = read(exerciseKey, {});
   const timerData = read(timerKey, []);
-  const sessionData = read(sessionKey, []);
+   const sessionData = read(sessionKey, []);
+   const worksheetData = read(worksheetKey, []);
 
   const attempted = Object.values(exerciseData).filter(Boolean);
   const reviewItems = Object.values(exerciseData).filter((entry) => entry?.status === 'needs-review');
@@ -146,7 +154,8 @@ const { lessons, exercises } = Astro.props;
   const milestoneRow = document.getElementById('milestone-row');
   const recentSessions = document.getElementById('recent-sessions');
   const reflectionChips = document.getElementById('reflection-chips');
-  const skillMap = document.getElementById('skill-map');
+   const skillMap = document.getElementById('skill-map');
+   const worksheetFocusMount = document.getElementById('worksheet-focus-map');
   const nextMoveActions = document.getElementById('next-move-actions');
 
   document.getElementById('completed-lessons').textContent = String(lessonData.length);
@@ -265,8 +274,9 @@ const { lessons, exercises } = Astro.props;
   document.getElementById('reflection-title').textContent = reflectionTitle;
   document.getElementById('reflection-copy').textContent = reflectionCopy;
 
-  const skillBuckets = ['abacus-orientation', 'number-reading', 'place-value', 'number-setting', 'addition', 'subtraction', 'complements', 'mixed-operations', 'multiplication', 'division'];
-  const labelize = (value) => value.replace(/-/g, ' ');
+   const skillBuckets = ['abacus-orientation', 'number-reading', 'place-value', 'number-setting', 'addition', 'subtraction', 'complements', 'mixed-operations', 'multiplication', 'division'];
+   const worksheetSubmodes = ['arithmetic-rhythm', 'complement-balance', 'sequence-signs', 'table-family', 'place-shifts', 'division-facts', 'quotient-building', 'anzan-recall'];
+   const labelize = (value) => value.replace(/-/g, ' ');
   skillBuckets.forEach((skill) => {
     const lessonHits = lessonMeta.filter((entry) => entry.skill === skill && lessonData.includes(entry.id)).length;
     const exerciseHits = exerciseMeta.filter((entry) => entry.skill === skill && exerciseData[entry.id]).length;
@@ -298,8 +308,37 @@ const { lessons, exercises } = Astro.props;
     worksheetLink.textContent = 'Worksheet';
     actions.append(practiceLink, worksheetLink);
     row.append(name, meter, meta, actions);
-    skillMap.appendChild(row);
-  });
+     skillMap.appendChild(row);
+   });
+
+   worksheetSubmodes.forEach((submode) => {
+     const sessions = worksheetData.filter((entry) => entry?.submode === submode || (submode === 'arithmetic-rhythm' && entry?.submode === 'auto'));
+     const completed = sessions.filter((entry) => Number(entry.answered || 0) > 0).length;
+     const bestAccuracy = sessions.reduce((best, entry) => Math.max(best, Number(entry.accuracy || 0)), 0);
+     const row = document.createElement('article');
+     row.className = 'skill-row';
+     const name = document.createElement('div');
+     name.className = 'skill-label';
+     name.innerHTML = `<strong>${labelize(submode)}</strong><small>${sessions.length} worksheet(s) · ${completed} answered</small>`;
+     const meter = document.createElement('div');
+     meter.className = 'skill-meter';
+     const fill = document.createElement('div');
+     fill.className = 'skill-meter-fill';
+     fill.style.width = `${Math.max(8, bestAccuracy)}%`;
+     meter.appendChild(fill);
+     const meta = document.createElement('span');
+     meta.className = 'muted small';
+     meta.textContent = sessions.length ? `best ${bestAccuracy}% accuracy` : 'not trained yet';
+     const actions = document.createElement('div');
+     actions.className = 'skill-actions';
+     const worksheetLink = document.createElement('a');
+     worksheetLink.href = `${base}worksheets?submode=${submode}`;
+     worksheetLink.className = 'text-link';
+     worksheetLink.textContent = 'Train';
+     actions.append(worksheetLink);
+     row.append(name, meter, meta, actions);
+     worksheetFocusMount?.appendChild(row);
+   });
 
   document.getElementById('reset-progress')?.addEventListener('click', () => {
     localStorage.removeItem(lessonKey);
