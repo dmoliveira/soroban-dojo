@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Hero from '../components/Hero.astro';
 import PathCards from '../components/PathCards.astro';
 import LevelGrid from '../components/LevelGrid.astro';
+import BossBadgeSummary from '../components/BossBadgeSummary.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const lessons = (await getCollection('lessons')).slice(0, 3);
@@ -83,11 +84,13 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     </article>
   </section>
 
-  <section class="panel">
+  <section class="panel"> 
     <p class="eyebrow">Levels</p>
     <h2>Move from first beads to mental soroban</h2>
     <LevelGrid />
   </section>
+
+  <BossBadgeSummary />
 
   <section class="split-grid">
     <article class="panel">

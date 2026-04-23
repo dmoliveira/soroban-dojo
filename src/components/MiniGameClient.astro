@@ -36,6 +36,15 @@
         <button class="button button-secondary minigame-start" data-game="anzan-flash">Start now</button>
       </div>
     </article>
+    <article class="choice-card">
+      <p class="eyebrow">Game</p>
+      <h3>Error fix</h3>
+      <p>Spot a wrong result and type the corrected answer before your streak disappears.</p>
+      <div class="button-row button-row-compact">
+        <button class="button button-secondary minigame-select" data-game="error-fix">Use game</button>
+        <button class="button button-secondary minigame-start" data-game="error-fix">Start now</button>
+      </div>
+    </article>
   </div>
 
   <div class="subtle-panel mini-game-summary">
@@ -44,6 +53,17 @@
     <div id="mini-game-best" class="muted small">Best score: 0</div>
     <div id="mini-game-tier" class="muted small">Tier: starter</div>
     <div id="mini-game-medal" class="muted small">Medal targets will appear here.</div>
+    <div class="button-row button-row-compact">
+      <label class="stack-sm mini-tier-picker">
+        <span>Difficulty tier</span>
+        <select id="mini-game-difficulty" class="select">
+          <option value="starter">Starter</option>
+          <option value="bronze">Bronze</option>
+          <option value="silver">Silver</option>
+          <option value="gold">Gold</option>
+        </select>
+      </label>
+    </div>
   </div>
 
   <div class="subtle-panel mini-game-playfield">
@@ -97,13 +117,52 @@
       title: 'Anzan flash',
       copy: 'Target skill: short mental sequence recall with sign changes.',
       thresholds: { bronze: 30, silver: 60, gold: 100 },
-      make: (round) => {
-        const packs = [
-          { prompt: '18 + 7 - 4 + 5', answer: 26 },
-          { prompt: '42 - 9 + 16 - 3', answer: 46 },
-          { prompt: '57 + 18 - 26 + 9', answer: 58 },
-        ];
-        return packs[round % packs.length];
+      make: (round, tier) => {
+        const packs = {
+          starter: [
+            { prompt: '18 + 7 - 4 + 5', answer: 26 },
+            { prompt: '42 - 9 + 16 - 3', answer: 46 },
+          ],
+          bronze: [
+            { prompt: '57 + 18 - 26 + 9', answer: 58 },
+            { prompt: '63 + 14 - 8 + 11', answer: 80 },
+          ],
+          silver: [
+            { prompt: '86 - 14 + 19 - 7', answer: 84 },
+            { prompt: '74 + 8 - 3 + 12', answer: 91 },
+          ],
+          gold: [
+            { prompt: '128 + 37 - 46 + 19', answer: 138 },
+            { prompt: '214 - 58 + 36 - 17', answer: 175 },
+          ],
+        };
+        return packs[tier][round % packs[tier].length];
+      },
+    },
+    'error-fix': {
+      title: 'Error fix',
+      copy: 'Target skill: detect the wrong result quickly, then repair it before the streak resets.',
+      thresholds: { bronze: 20, silver: 45, gold: 75 },
+      make: (round, tier) => {
+        const sets = {
+          starter: [
+            { prompt: 'Fix this result: 2 + 3 = 4', answer: 5 },
+            { prompt: 'Fix this result: 8 - 2 = 7', answer: 6 },
+          ],
+          bronze: [
+            { prompt: 'Fix this result: 24 + 7 + 1 = 31', answer: 32 },
+            { prompt: 'Fix this result: 36 - 12 = 25', answer: 24 },
+          ],
+          silver: [
+            { prompt: 'Fix this result: 12 × 3 = 34', answer: 36 },
+            { prompt: 'Fix this result: 24 ÷ 6 = 5', answer: 4 },
+          ],
+          gold: [
+            { prompt: 'Fix this result: 57 + 18 - 26 + 9 = 60', answer: 58 },
+            { prompt: 'Fix this result: 23 × 4 = 96', answer: 92 },
+          ],
+        };
+        return sets[tier][round % sets[tier].length];
       },
     },
   };
@@ -113,6 +172,7 @@
   let score = 0;
   let streak = 0;
   let round = 0;
+  let currentTier = 'starter';
 
   const readScores = () => {
     try { return JSON.parse(localStorage.getItem(scoreKey) || '{}'); } catch { return {}; }
@@ -128,6 +188,17 @@
     if (best >= game.thresholds.bronze) return 'bronze';
     return 'starter';
   };
+  const tierOrder = ['starter', 'bronze', 'silver', 'gold'];
+  const unlockedTierIndex = (medal) => tierOrder.indexOf(medal || 'starter');
+  const syncTierPicker = (medal) => {
+    const picker = byId('mini-game-difficulty');
+    const unlocked = unlockedTierIndex(medal);
+    [...picker.options].forEach((option, index) => {
+      option.disabled = index > unlocked;
+    });
+    if (tierOrder.indexOf(currentTier) > unlocked) currentTier = tierOrder[unlocked];
+    picker.value = currentTier;
+  };
   const syncGameMeta = () => {
     const game = games[currentGame];
     const scores = readScores();
@@ -139,6 +210,7 @@
     byId('mini-game-best').textContent = `Best score: ${best}`;
     byId('mini-game-tier').textContent = `Tier: ${medal}`;
     byId('mini-game-medal').textContent = `Medal targets: bronze ${game.thresholds.bronze}, silver ${game.thresholds.silver}, gold ${game.thresholds.gold}`;
+    syncTierPicker(medal);
   };
   const syncStats = () => {
     byId('mini-game-score').textContent = String(score);
@@ -147,7 +219,7 @@
   };
   const startRound = () => {
     round += 1;
-    currentRound = games[currentGame].make(round);
+    currentRound = games[currentGame].make(round, currentTier);
     byId('mini-game-prompt').textContent = currentRound.prompt;
     byId('mini-game-answer').value = '';
     byId('mini-game-feedback').textContent = 'Solve it, then check your answer.';
@@ -195,6 +267,12 @@
   }));
   byId('mini-game-generate')?.addEventListener('click', startRound);
   byId('mini-game-check')?.addEventListener('click', checkRound);
+  byId('mini-game-difficulty')?.addEventListener('change', (event) => {
+    currentTier = event.target.value;
+    score = 0; streak = 0; round = 0; currentRound = null;
+    syncStats();
+    byId('mini-game-prompt').textContent = 'Generate a round to start.';
+  });
   byId('mini-game-answer')?.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter') return;
     event.preventDefault();

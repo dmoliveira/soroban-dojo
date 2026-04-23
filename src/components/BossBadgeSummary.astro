@@ -1,0 +1,32 @@
+<section class="panel boss-badge-panel">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Boss badges</p>
+      <h2>Earned level milestones</h2>
+      <p class="muted">Complete boss rounds to earn visible badges that mark each level as conquered.</p>
+    </div>
+  </div>
+  <div id="boss-badge-strip" class="milestone-row"></div>
+  <p id="boss-badge-copy" class="muted small">No boss badges earned yet. Finish one boss round to start your badge row.</p>
+</section>
+
+<script is:inline>
+  const key = 'soroban-dojo:boss-rounds';
+  const strip = document.getElementById('boss-badge-strip');
+  const copy = document.getElementById('boss-badge-copy');
+  const levels = ['L0', 'L1', 'L2', 'L3', 'L4', 'L5'];
+  const read = () => { try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; } };
+  const state = read();
+  let earned = 0;
+  levels.forEach((level) => {
+    const chip = document.createElement('div');
+    const done = !!state[level];
+    if (done) earned += 1;
+    chip.className = `milestone-chip ${done ? 'active' : ''}`;
+    chip.textContent = done ? `${level} badge` : `${level} locked`;
+    strip.appendChild(chip);
+  });
+  copy.textContent = earned
+    ? `You have earned ${earned} boss badge${earned === 1 ? '' : 's'}. Keep clearing levels to complete the full row.`
+    : 'No boss badges earned yet. Finish one boss round to start your badge row.';
+</script>
