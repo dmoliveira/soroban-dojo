@@ -45,6 +45,8 @@ test('worksheet preset query opens focused multiplication drills', async ({ page
   await expect(page.locator('#worksheet-band-guide')).toContainText('Every shown operand stays within 2-4 digits');
   await expect(page.locator('#worksheet-current-setup-copy')).toContainText('ramp up');
   await expect(page.locator('#worksheet-target-summary')).toContainText('place-shifts');
+  await expect(page.locator('#worksheet-worked-title')).toContainText('Place-shift example');
+  await expect(page.locator('#worksheet-worked-prompt')).toContainText('14 × 4');
 });
 
 test('adaptive worksheet targets division weakness automatically', async ({ page }) => {

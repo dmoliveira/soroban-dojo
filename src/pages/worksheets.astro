@@ -168,6 +168,11 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       <p id="worksheet-focus-copy" class="muted small">This sheet can adapt its drill style to the selected family or your recent weak areas.</p>
       <p id="worksheet-focus-example" class="muted small">Example focus: balanced variety across the current sheet.</p>
     </div>
+    <div class="subtle-panel worksheet-worked-example">
+      <strong id="worksheet-worked-title">Worked example</strong>
+      <p id="worksheet-worked-prompt" class="muted small">A representative drill will appear here so you know what this worksheet is training.</p>
+      <p id="worksheet-worked-method" class="muted small">Generate the sheet to see how the current focus is meant to feel.</p>
+    </div>
 
     <div class="worksheet-scorebar subtle-panel" id="worksheet-scorebar">
       <strong>Score</strong>
@@ -279,10 +284,12 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     const adaptiveNoteCopy = byId('adaptive-note-copy');
     const currentSetupCopy = byId('worksheet-current-setup-copy');
     const exerciseStateKey = 'soroban-dojo:exercise-states';
+    const worksheetSessionKey = 'soroban-dojo:worksheet-sessions';
     let worksheetTimerStartedAt = null;
     let worksheetTimerInterval = null;
     let celebrationTimeout = null;
     let resolvedWorksheetTarget = 'auto';
+    let currentWorksheetSessionId = null;
     const audioWindow = typeof window !== 'undefined' ? /** @type {any} */ (window) : null;
     const AudioContextCtor = audioWindow
       ? audioWindow.AudioContext || (audioWindow).webkitAudioContext || null
@@ -632,6 +639,49 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       },
     };
 
+    const workedExamples = {
+      auto: { title: 'Balanced example', prompt: '124 + 37 - 15', method: 'Read the running total after each move and keep the sheet varied instead of repeating one shape.' },
+      'arithmetic-rhythm': { title: 'Arithmetic rhythm example', prompt: '318 + 56', method: 'Let the ones and tens settle before rushing into the next line.' },
+      'complement-balance': { title: 'Complement balance example', prompt: '7 + 3', method: 'Think in completion pairs so the move is smaller than forcing a direct count.' },
+      'sequence-signs': { title: 'Sequence sign example', prompt: '274 + 88 - 46', method: 'Re-read the total after the sign change before taking the next move.' },
+      'table-family': { title: 'Table family example', prompt: '8 × 6', method: 'Stay with one multiplier family long enough to feel the product pattern repeating.' },
+      'place-shifts': { title: 'Place-shift example', prompt: '14 × 4', method: 'Separate the tens product from the ones product before combining them.' },
+      'division-facts': { title: 'Division facts example', prompt: '48 ÷ 6', method: 'Find the missing factor and confirm it by reversing the fact family.' },
+      'quotient-building': { title: 'Quotient-building example', prompt: '24 ÷ 6', method: 'Ask what times 6 gives 24, then verify the quotient immediately.' },
+      'anzan-recall': { title: 'Mental recall example', prompt: '18 + 7 - 4 + 5', method: 'Keep the running total alive after each sign change instead of stacking every step at once.' },
+    };
+
+    const readWorksheetSessions = () => {
+      try {
+        return JSON.parse(localStorage.getItem(worksheetSessionKey) || '[]');
+      } catch {
+        return [];
+      }
+    };
+
+    const writeWorksheetSessions = (sessions) => localStorage.setItem(worksheetSessionKey, JSON.stringify(sessions.slice(0, 40)));
+
+    const persistWorksheetSession = (metrics = {}) => {
+      if (!currentWorksheetSessionId) return;
+      const sessions = readWorksheetSessions();
+      const entry = {
+        id: currentWorksheetSessionId,
+        level: byId('worksheet-level').value,
+        families: selectedFamilies(),
+        submode: byId('worksheet-submode').value === 'auto' ? resolvedWorksheetTarget : byId('worksheet-submode').value,
+        mode: byId('worksheet-mode').value,
+        count: Number(byId('worksheet-count').value),
+        accuracy: Number(metrics.accuracy || 0),
+        answered: Number(metrics.answered || 0),
+        correct: Number(metrics.correct || 0),
+        updatedAt: new Date().toISOString(),
+      };
+      const existingIndex = sessions.findIndex((session) => session.id === currentWorksheetSessionId);
+      if (existingIndex >= 0) sessions.splice(existingIndex, 1);
+      sessions.unshift(entry);
+      writeWorksheetSessions(sessions);
+    };
+
     const styleAdjustBand = (style, band) => {
       if (style === 'speed') {
         if (band === '4-6') return '3-4';
@@ -800,6 +850,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 
     const renderSheet = () => {
       const prompts = buildPrompts();
+      currentWorksheetSessionId = `ws-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
       const orientation = byId('worksheet-orientation').value;
       const ledgerHead = byId('worksheet-ledger-head');
       const teacherMode = byId('worksheet-style').value === 'teacher';
@@ -859,8 +910,12 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       const focusTitle = byId('worksheet-focus-title');
       const focusCopy = byId('worksheet-focus-copy');
       const focusExample = byId('worksheet-focus-example');
+      const workedTitle = byId('worksheet-worked-title');
+      const workedPrompt = byId('worksheet-worked-prompt');
+      const workedMethod = byId('worksheet-worked-method');
       const focusKey = submodeLabel === 'auto' ? resolvedWorksheetTarget : submodeLabel;
       const focusGuide = focusGuideCopy[focusKey] || focusGuideCopy.auto;
+      const workedExample = workedExamples[focusKey] || workedExamples.auto;
       byId('worksheet-title').textContent = `${levelLabel} ${familyLabel} ${orientation === 'vertical' ? 'columns' : 'ledger'} · ${bandLabel} digits`;
       byId('worksheet-count-badge').textContent = `${prompts.length} drills`;
       currentSetupCopy.textContent = `${levelLabel} · ${byId('worksheet-mode').value} · ${familyLabel} · ${bandLabel} digits · ${flowLabel} · ${submodeLabel} · ${orientation}`;
@@ -870,6 +925,9 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       if (focusTitle) focusTitle.textContent = focusGuide.title;
       if (focusCopy) focusCopy.textContent = focusGuide.copy;
       if (focusExample) focusExample.textContent = focusGuide.example;
+      if (workedTitle) workedTitle.textContent = workedExample.title;
+      if (workedPrompt) workedPrompt.textContent = `Representative drill: ${workedExample.prompt}`;
+      if (workedMethod) workedMethod.textContent = workedExample.method;
       scoreCopy.textContent = teacherMode
         ? 'Teacher key mode is active. Print or reveal for guided review.'
         : adaptiveMode
@@ -879,6 +937,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       setMetric('worksheet-correct', 0);
       setMetric('worksheet-accuracy', '0%');
       setMetric('worksheet-completion', '0%');
+      persistWorksheetSession();
     };
 
     const scoreSheet = (reveal = false) => {
@@ -912,6 +971,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         setMetric('worksheet-accuracy', '0%');
         setMetric('worksheet-completion', '0%');
         celebration.hidden = true;
+        persistWorksheetSession();
         return;
       }
       const percent = Math.round((correct / answered) * 100);
@@ -933,6 +993,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         celebration.hidden = true;
         celebration.classList.remove('celebrate');
       }
+      persistWorksheetSession({ answered, correct, accuracy: percent });
     };
 
     const applyWriteCellShortcut = (event) => {

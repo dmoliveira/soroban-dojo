@@ -29,3 +29,17 @@ test('division lesson links into focused worksheet submodes', async ({ page }) =
   await expect(page).toHaveURL(/submode=quotient-building/);
   await expect(page.locator('#worksheet-focus-title')).toContainText('Division quotient building');
 });
+
+test('weekly study plan adapts to multiplication weakness', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('soroban-dojo:exercise-states', JSON.stringify({
+      a: { status: 'needs-review', level: 'L4', skill: 'multiplication', sessionId: 'exercise:L4:multiplication' },
+      b: { status: 'needs-review', level: 'L4', skill: 'multiplication', sessionId: 'exercise:L4:multiplication' },
+    }));
+  });
+
+  await page.goto('/ai-soroban/study-plan');
+
+  await expect(page.locator('#weekly-plan-title')).toContainText('Multiplication structure week');
+  await expect(page.getByRole('link', { name: 'Open worksheet' }).last()).toHaveAttribute('href', /submode=place-shifts/);
+});
