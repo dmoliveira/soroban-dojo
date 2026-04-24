@@ -78,6 +78,7 @@ const rounds = [
         {rounds.map((round) => <option value={round.level}>{round.level}</option>)}
       </select>
       <button class="button button-secondary" id="print-certificate">Print certificate</button>
+      <button class="button button-secondary" id="copy-certificate">Copy text</button>
     </div>
     <div id="boss-certificate-preview" class="subtle-panel boss-certificate-preview">
       <p class="eyebrow">Preview</p>
@@ -113,6 +114,7 @@ const rounds = [
     const certificateTitle = document.getElementById('certificate-title');
     const certificateCopy = document.getElementById('certificate-copy');
     const printCertificate = document.getElementById('print-certificate');
+    const copyCertificate = document.getElementById('copy-certificate');
     const certificateKey = 'soroban-dojo:boss-certificates';
     const readCertificates = () => { try { return JSON.parse(localStorage.getItem(certificateKey) || '{}'); } catch { return {}; } };
     const writeCertificates = (state) => localStorage.setItem(certificateKey, JSON.stringify(state));
@@ -124,6 +126,13 @@ const rounds = [
       certificateCopy.textContent = earned
         ? `${earned.name} cleared the ${level} boss round on ${earned.date}.`
         : `Finish the ${level} boss round, then print a certificate for that milestone.`;
+    };
+    const buildCertificateText = () => {
+      const level = certificateLevel.value;
+      const certificates = readCertificates();
+      const earned = certificates[level];
+      if (!earned) return null;
+      return `Soroban Dojo Certificate\n${earned.name} cleared the ${level} boss round on ${earned.date}.`;
     };
     const sync = () => {
       const state = read();
@@ -159,13 +168,25 @@ const rounds = [
     }));
     certificateLevel.addEventListener('change', syncCertificatePreview);
     printCertificate.addEventListener('click', () => {
-      const certificates = readCertificates();
-      const level = certificateLevel.value;
-      if (!certificates[level]) {
-        certificateCopy.textContent = `Finish the ${level} boss round before printing its certificate.`;
+      const text = buildCertificateText();
+      if (!text) {
+        certificateCopy.textContent = `Finish the ${certificateLevel.value} boss round before printing its certificate.`;
         return;
       }
       window.print();
+    });
+    copyCertificate.addEventListener('click', async () => {
+      const text = buildCertificateText();
+      if (!text) {
+        certificateCopy.textContent = `Finish the ${certificateLevel.value} boss round before copying its certificate.`;
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        certificateCopy.textContent = `${text} Copied to clipboard.`;
+      } catch {
+        certificateCopy.textContent = `${text} Copy failed in this browser; select and copy the text manually.`;
+      }
     });
     sync();
   </script>

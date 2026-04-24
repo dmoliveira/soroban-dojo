@@ -4,6 +4,7 @@ import Hero from '../components/Hero.astro';
 import PathCards from '../components/PathCards.astro';
 import LevelGrid from '../components/LevelGrid.astro';
 import BossBadgeSummary from '../components/BossBadgeSummary.astro';
+import CertificateSummary from '../components/CertificateSummary.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const lessons = (await getCollection('lessons')).slice(0, 3);
@@ -91,6 +92,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
   </section>
 
   <BossBadgeSummary />
+  <CertificateSummary />
 
   <section class="split-grid">
     <article class="panel">

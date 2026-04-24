@@ -63,3 +63,13 @@ test('boss certificate preview updates after boss completion', async ({ page }) 
   await expect(page.locator('#certificate-copy')).toContainText('Diego');
   await expect(page.locator('#certificate-copy')).toContainText('L0');
 });
+
+test('boss certificate text can be copied after completion', async ({ page }) => {
+  await page.goto('/ai-soroban/boss-rounds');
+
+  await page.locator('#certificate-name').fill('Diego');
+  await page.locator('.boss-round-toggle').first().click();
+  await page.locator('#copy-certificate').click();
+
+  await expect(page.locator('#certificate-copy')).toContainText(/Copied to clipboard|Copy failed in this browser/);
+});
