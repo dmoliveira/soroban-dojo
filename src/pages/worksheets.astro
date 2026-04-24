@@ -837,11 +837,29 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       if (!fixedFamily.length) return [];
       if (mode === 'fixed') {
         resolvedWorksheetTarget = selectedSubmode;
-        const matchingFixed = fixedFamily.filter((prompt) => promptFitsBand(prompt, overallBandRange));
-        const source = matchingFixed.length ? matchingFixed : fixedFamily;
-        const cycled = [];
-        while (cycled.length < count) cycled.push(...shuffle(source));
-        return cycled.slice(0, count);
+        const familyBuckets = families.map((family, familyIndex) => {
+          const familyFixed = (bank[family] || []).filter((prompt) => promptFitsBand(prompt, overallBandRange));
+          const targetCount = Math.max(1, Math.ceil(count / Math.max(1, families.length)));
+          const prompts = [...familyFixed];
+          if (!prompts.length || prompts.length < targetCount) {
+            const needed = targetCount - prompts.length;
+            const dynamicBackfill = buildUniquePrompts(
+              needed,
+              (index, attempt) => makeDynamicPrompt(level, family, band, style, familyIndex * 100 + index + attempt, digitBandForProgress(overallBandRange, count, prompts.length + index, flowMode), selectedSubmode),
+              (index) => digitBandForProgress(overallBandRange, count, prompts.length + index, flowMode),
+            );
+            prompts.push(...dynamicBackfill);
+          }
+          return shuffle(prompts.slice(0, targetCount));
+        }).filter((bucket) => bucket.length);
+
+        const interleaved = [];
+        while (interleaved.length < count && familyBuckets.some((bucket) => bucket.length)) {
+          familyBuckets.forEach((bucket) => {
+            if (bucket.length && interleaved.length < count) interleaved.push(bucket.shift());
+          });
+        }
+        return interleaved;
       }
       if (mode === 'adaptive') {
         const weakAreas = readWeakAreas();
