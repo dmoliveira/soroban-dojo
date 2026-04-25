@@ -257,7 +257,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       recentSessions.appendChild(card);
     });
   } else {
-    recentSessions.innerHTML = '<p class="muted">Your recent sessions will appear here after your first full practice.</p>';
+    recentSessions.innerHTML = '<div class="empty-state-card muted"><div class="empty-state-head"><span class="empty-state-mark">✦</span><strong>No recent sessions yet</strong></div><p>Finish one full practice session and it will appear here for quick review.</p></div>';
   }
 
   const reflectionItems = [
