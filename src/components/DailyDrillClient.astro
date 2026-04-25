@@ -2,17 +2,35 @@
 const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 ---
 
-<section class="panel daily-drill-panel" data-base={base}>
-  <div class="section-head">
-    <div>
-      <p class="eyebrow">Daily drill pack · 日々の修練</p>
-      <h1>Generate today’s focused set</h1>
+<section class="daily-drill-studio" data-base={base} style={`--daily-mist:url('${base}graphics/worksheet-mist.svg')`}>
+  <section class="panel daily-drill-hero">
+    <div class="daily-drill-hero-brand">
+      <div class="daily-drill-mark" aria-hidden="true">
+        <img src={`${base}graphics/sakura-mark.svg`} alt="" />
+      </div>
+      <div>
+        <p class="eyebrow">Daily drill pack · 日々の修練</p>
+        <h1>Generate today’s focused set</h1>
+        <p id="daily-drill-copy" class="muted">This pack now adapts to weak areas and unfinished weekly-plan steps so today’s work stays practical.</p>
+      </div>
     </div>
-    <span class="badge">Fresh each day</span>
-  </div>
-  <p id="daily-drill-copy" class="muted">This pack now adapts to weak areas and unfinished weekly-plan steps so today’s work stays practical.</p>
+    <div class="daily-drill-hero-stats">
+      <article class="subtle-panel daily-drill-stat"><span>Pack ID</span><strong id="daily-pack-id">Daily pack ID will appear here.</strong></article>
+      <article class="subtle-panel daily-drill-stat"><span>Adaptive focus</span><strong id="daily-drill-focus">Adaptive focus will appear here.</strong></article>
+      <article class="subtle-panel daily-drill-stat"><span>Archetype</span><strong id="daily-pack-archetype">Pack archetype will appear here.</strong></article>
+    </div>
+  </section>
 
-  <div class="practice-grid">
+  <section class="panel daily-drill-command-deck">
+    <div class="daily-drill-command-head">
+      <div>
+        <p class="eyebrow">Route builder</p>
+        <h2>Choose the level and generate</h2>
+      </div>
+      <span class="badge">Fresh each day</span>
+    </div>
+
+    <div class="practice-grid">
     <div class="stack-sm">
       <label class="stack-sm">
         <span>Level · 段階</span>
@@ -31,29 +49,102 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         <button class="button button-secondary" id="reveal-daily-answers">Reveal answers</button>
       </div>
     </div>
-    <div class="subtle-panel">
-      <p class="eyebrow">Pack identity</p>
-      <div id="daily-pack-id" class="muted">Daily pack ID will appear here.</div>
-      <div id="daily-drill-focus" class="muted small">Adaptive focus will appear here.</div>
-      <div id="daily-pack-archetype" class="muted small">Pack archetype will appear here.</div>
-    </div>
+      <div class="subtle-panel daily-drill-summary-card">
+        <strong>Session cue</strong>
+        <p class="muted small">Generate one pack, solve it calmly, then print or reveal only when you need support.</p>
+      </div>
   </div>
 
-  <div class="subtle-panel daily-drill-guidance">
-    <strong id="daily-guidance-title">Today’s route</strong>
-    <p id="daily-guidance-copy" class="muted small">Finish the unfinished weekly-plan step first, then use the supporting drills below.</p>
-    <div class="button-row button-row-compact">
-      <a class="button button-secondary" id="daily-link-lesson" href={`${base}lessons`}>Lesson step</a>
-      <a class="button button-secondary" id="daily-link-exercise" href={`${base}exercises`}>Exercise step</a>
-      <a class="button button-secondary" id="daily-link-worksheet" href={`${base}worksheets`}>Worksheet step</a>
+    <div class="subtle-panel daily-drill-guidance">
+      <strong id="daily-guidance-title">Today’s route</strong>
+      <p id="daily-guidance-copy" class="muted small">Finish the unfinished weekly-plan step first, then use the supporting drills below.</p>
+      <div class="button-row button-row-compact">
+        <a class="button button-secondary" id="daily-link-lesson" href={`${base}lessons`}>Lesson step</a>
+        <a class="button button-secondary" id="daily-link-exercise" href={`${base}exercises`}>Exercise step</a>
+        <a class="button button-secondary" id="daily-link-worksheet" href={`${base}worksheets`}>Worksheet step</a>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <ol id="daily-drill-list" class="list-clean"></ol>
+  <section class="panel daily-drill-board">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Drill board</p>
+        <h2>Today’s prompts</h2>
+      </div>
+      <span class="badge">Attempt first</span>
+    </div>
+    <ol id="daily-drill-list" class="list-clean"></ol>
+  </section>
 </section>
 
+<style>
+  .daily-drill-studio {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .daily-drill-hero,
+  .daily-drill-command-deck,
+  .daily-drill-board,
+  .daily-drill-hero-stats .subtle-panel,
+  .daily-drill-summary-card {
+    border: 1px solid rgba(244, 194, 194, 0.55);
+    box-shadow: 0 18px 48px rgba(201, 114, 114, 0.08);
+    background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,251,249,0.96));
+  }
+
+  .daily-drill-hero {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    background-image: linear-gradient(135deg, rgba(255,250,248,0.95), rgba(255,244,246,0.98)), var(--daily-mist);
+    background-size: cover;
+    background-position: center bottom;
+  }
+
+  .daily-drill-hero-brand {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .daily-drill-mark {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 1.5rem;
+    background: rgba(255,255,255,0.8);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 12px 32px rgba(201, 114, 114, 0.12);
+    flex: 0 0 auto;
+  }
+
+  .daily-drill-mark img { width: 3.25rem; height: 3.25rem; }
+
+  .daily-drill-hero-stats {
+    display: grid;
+    gap: 0.85rem;
+    align-content: start;
+  }
+
+  .daily-drill-stat { display: grid; gap: 0.35rem; }
+  .daily-drill-stat span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #9a6c6c; }
+
+  .daily-drill-command-head { display:flex; gap:1rem; align-items:end; justify-content:space-between; margin-bottom:1rem; }
+  .daily-drill-command-head p:last-child { margin:0; max-width:30rem; }
+
+  .daily-drill-summary-card { display:grid; gap:0.5rem; }
+
+  .daily-drill-board .section-head { margin-bottom: 1rem; }
+
+  @media (max-width: 900px) {
+    .daily-drill-hero { grid-template-columns: 1fr; }
+  }
+</style>
+
 <script is:inline>
-  const base = document.querySelector('.daily-drill-panel')?.dataset.base || '/soroban-dojo/';
+  const base = document.querySelector('.daily-drill-studio')?.dataset.base || '/';
   const exerciseKey = 'soroban-dojo:exercise-states';
   const weeklyPlanKey = 'soroban-dojo:weekly-study-plan';
 
