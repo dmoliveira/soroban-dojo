@@ -1,0 +1,16 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="petal" x1="12" y1="10" x2="66" y2="72" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB6C7"/>
+      <stop offset="1" stop-color="#FF6A8E"/>
+    </linearGradient>
+  </defs>
+  <circle cx="40" cy="40" r="38" fill="#FFF9F7" stroke="#F6D7D6"/>
+  <path d="M40 22C44 15 53 14 57 20C60 25 58 33 50 37C56 39 61 45 59 52C56 60 46 61 40 54C34 61 24 60 21 52C19 45 24 39 30 37C22 33 20 25 23 20C27 14 36 15 40 22Z" fill="url(#petal)"/>
+  <circle cx="40" cy="39" r="7" fill="#FFE9A6" stroke="#F2B36F"/>
+  <circle cx="36" cy="36" r="1.5" fill="#F28A5B"/>
+  <circle cx="44" cy="36" r="1.5" fill="#F28A5B"/>
+  <circle cx="40" cy="41" r="1.5" fill="#F28A5B"/>
+  <circle cx="35" cy="43" r="1.5" fill="#F28A5B"/>
+  <circle cx="45" cy="43" r="1.5" fill="#F28A5B"/>
+</svg>
