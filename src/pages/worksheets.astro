@@ -109,7 +109,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       </label>
       </div>
       <details class="worksheet-advanced-block">
-        <summary id="worksheet-advanced-summary">Advanced options · 40 drills · balanced variety</summary>
+        <summary id="worksheet-advanced-summary">Advanced options · Practice · 40 drills · Ledger rows</summary>
         <div class="worksheet-controls-grid worksheet-controls-grid-advanced">
           <label class="stack-sm">
             <span>Sheet type</span>
@@ -177,7 +177,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
     </div>
     <div class="worksheet-current-setup subtle-panel">
       <strong>Current setup</strong>
-      <div id="worksheet-current-setup-copy" class="muted small">L0 · Fixed sheet · Addition + subtraction · 1-digit band · Ledger rows</div>
+      <div id="worksheet-current-setup-copy" class="muted small">L0 Foundations · Fixed sheet · Addition + subtraction · 1-digit band · Fixed op count · Ledger rows</div>
       <div id="worksheet-band-summary" class="muted small">Each shown operand stays in the selected digit band.</div>
       <div id="worksheet-target-summary" class="muted small">Focus target: auto</div>
     </div>
@@ -238,6 +238,83 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       <div id="worksheet-table" class="worksheet-table ledger-table"></div>
     </article>
   </section>
+
+  <style>
+    .worksheet-controls-shell {
+      display: grid;
+      gap: 1rem;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .worksheet-controls-grid {
+      align-items: start;
+    }
+
+    .worksheet-controls-grid label,
+    .worksheet-controls-grid fieldset,
+    .worksheet-advanced-block,
+    .worksheet-advanced-block summary {
+      position: relative;
+      z-index: 0;
+    }
+
+    .worksheet-advanced-block {
+      border-top: 1px solid rgba(148, 163, 184, 0.25);
+      padding-top: 0.75rem;
+    }
+
+    .worksheet-advanced-block summary {
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .worksheet-current-setup,
+    .worksheet-focus-guide,
+    .worksheet-worked-example {
+      margin-top: 1rem;
+    }
+
+    .worksheet-primary-intent {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.75rem;
+    }
+
+    .worksheet-primary-intent .muted {
+      margin: 0;
+      max-width: 44rem;
+    }
+
+    .vertical-drill-row,
+    .worksheet-row {
+      display: grid;
+      gap: 0.5rem;
+      align-content: start;
+    }
+
+    .worksheet-answer-block {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .worksheet-answer-label {
+      font-size: 0.75rem;
+      color: var(--muted, #6b7280);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .worksheet-row-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+  </style>
 
   <script is:inline>
     const fixedBanks = {
@@ -741,6 +818,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         return [];
       }
     };
+<<<<<<< HEAD
     const modeLabels = {
       fixed: 'Fixed sheet',
       dynamic: 'Dynamic ledger',
@@ -773,6 +851,17 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       'division-facts': 'Division fact families',
       'quotient-building': 'Division quotient building',
       'anzan-recall': 'Mental recall',
+||||||| parent of 57d521c (Fix worksheet control clickability and polish layout)
+=======
+    const modeLabels = { fixed: 'Fixed sheet', dynamic: 'Dynamic ledger', adaptive: 'Adaptive ledger' };
+    const orientationLabels = { ledger: 'Ledger rows', vertical: 'Vertical columns' };
+    const flowLabels = { balanced: 'Balanced variety', ramp: 'Ramp up' };
+    const familyLabels = {
+      addition: 'Addition', subtraction: 'Subtraction', mixed: 'Mixed arithmetic', sequence: 'Sequence', multiplication: 'Multiplication', division: 'Division', anzan: 'Mental / anzan',
+    };
+    const submodeLabels = {
+      auto: 'Auto focus', 'arithmetic-rhythm': 'Arithmetic rhythm', 'complement-balance': 'Complement balance', 'sequence-signs': 'Sequence sign changes', 'table-family': 'Multiplication table family', 'place-shifts': 'Multiplication place shifts', 'division-facts': 'Division fact families', 'quotient-building': 'Division quotient building', 'anzan-recall': 'Mental recall',
+>>>>>>> 57d521c (Fix worksheet control clickability and polish layout)
     };
     const formatBandLabel = (band) => band.includes('-') ? `${band} digit band` : `${band}-digit band`;
     const formatFamilySummary = (families) => {
@@ -1050,13 +1139,13 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
           col.className = 'vertical-drill-column';
           prompts.slice(c * perColumn, (c + 1) * perColumn).forEach((prompt, index) => {
             const absoluteIndex = c * perColumn + index;
-            const row = document.createElement('label');
+            const row = document.createElement('article');
             row.className = 'vertical-drill-row';
             row.innerHTML = `
               <span class="ledger-no">${absoluteIndex + 1}</span>
               ${renderVerticalPrompt(prompt)}
-              <input class="input worksheet-input vertical-input" data-prompt="${prompt}" type="text" inputmode="numeric" placeholder="Write" />
-              <small class="worksheet-feedback vertical-feedback"></small>
+              <div class="worksheet-answer-block"><span class="worksheet-answer-label">Answer</span><input class="input worksheet-input vertical-input" data-prompt="${prompt}" type="text" inputmode="numeric" placeholder="Write" /></div>
+              <small class="worksheet-feedback vertical-feedback" aria-live="polite"></small>
               <div class="worksheet-row-actions"><button type="button" class="mini-action" data-row-action="check">Check</button><button type="button" class="mini-action" data-row-action="reveal">Reveal</button></div>
             `;
             col.appendChild(row);
@@ -1065,13 +1154,13 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         }
       } else {
         prompts.forEach((prompt, index) => {
-          const row = document.createElement('label');
+          const row = document.createElement('article');
           row.className = 'ledger-row worksheet-row';
           row.innerHTML = `
             <span class="ledger-no">${index + 1}</span>
             <span class="worksheet-prompt ledger-prompt">${prompt}</span>
-            <input class="input worksheet-input ledger-input" data-prompt="${prompt}" type="text" inputmode="numeric" placeholder="Write" />
-            <small class="worksheet-feedback ledger-feedback"></small>
+            <div class="worksheet-answer-block"><span class="worksheet-answer-label">Answer</span><input class="input worksheet-input ledger-input" data-prompt="${prompt}" type="text" inputmode="numeric" placeholder="Write" /></div>
+            <small class="worksheet-feedback ledger-feedback" aria-live="polite"></small>
             <div class="worksheet-row-actions"><button type="button" class="mini-action" data-row-action="check">Check</button><button type="button" class="mini-action" data-row-action="reveal">Reveal</button></div>
           `;
           table.appendChild(row);
@@ -1093,6 +1182,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       const submodeLabel = byId('worksheet-submode').value || 'auto';
       const modeLabel = modeLabels[byId('worksheet-mode').value] || byId('worksheet-mode').value;
       const orientationLabel = orientationLabels[orientation] || orientation;
+      const styleLabel = byId('worksheet-style')?.selectedOptions?.[0]?.textContent?.trim() || 'Practice';
       const timerLabel = byId('worksheet-timer-mode')?.value === 'on' ? 'Timer on' : 'Timer off';
       const printLabel = byId('worksheet-print-mode')?.value === 'answer-key' ? 'Answer key' : 'Student sheet';
       const bandGuide = byId('worksheet-band-guide');
@@ -1113,11 +1203,11 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       currentSetupCopy.textContent = `${levelLabel} · ${modeLabel} · ${familyLabel} · ${formatBandLabel(bandLabel)} · ${supportsOpRange ? opLabel : 'fixed op count'} · ${orientationLabel}`;
       if (bandGuide) bandGuide.textContent = supportsOpRange
         ? (bandLabel.includes('-')
-            ? `Every number shown in each drill stays inside the ${formatBandLabel(bandLabel)}. Each drill randomly uses ${opRange.min}–${opRange.max} operations, so expect a mix across that span rather than the same width on every row.`
-            : `Every number shown in each drill stays inside the ${formatBandLabel(bandLabel)}. Each drill randomly uses ${opRange.min}–${opRange.max} operations.`)
+          ? `Every number shown in each drill stays inside the ${formatBandLabel(bandLabel)}. Each drill randomly uses ${opRange.min}–${opRange.max} operations, so expect a mix across that span rather than the same width on every row.`
+          : `Every number shown in each drill stays inside the ${formatBandLabel(bandLabel)}. Each drill randomly uses ${opRange.min}–${opRange.max} operations.`)
         : (bandLabel.includes('-')
-            ? `Every number shown in each drill stays inside the ${formatBandLabel(bandLabel)}. Expect a mix across that span rather than the same width on every row.`
-            : `Every number shown in each drill stays inside the ${formatBandLabel(bandLabel)}.`);
+          ? `Every number shown in each drill stays inside the ${formatBandLabel(bandLabel)}. Expect a mix across that span rather than the same width on every row.`
+          : `Every number shown in each drill stays inside the ${formatBandLabel(bandLabel)}.`);
       if (bandSummary) bandSummary.textContent = supportsOpRange
         ? `Flow: ${flowLabel}. Families: ${familyLabel}. Operation range: ${opRange.min}–${opRange.max}. ${bandLabel.includes('-') ? 'Ranges intentionally mix easier and denser rows.' : 'Every row keeps the same operand width.'}`
         : `Flow: ${flowLabel}. Families: ${familyLabel}. ${bandLabel.includes('-') ? 'Ranges intentionally mix easier and denser rows.' : 'Every row keeps the same operand width.'}`;
@@ -1148,7 +1238,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       inputs.forEach((input) => {
         const row = input.closest('.ledger-row, .vertical-drill-row');
         const expected = solvePrompt(input.dataset.prompt);
-        const feedback = input.parentElement.querySelector('.worksheet-feedback');
+        const feedback = row?.querySelector('.worksheet-feedback');
         const value = input.value.trim();
         if (!value) {
           feedback.textContent = '';
@@ -1318,7 +1408,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       const nextInput = inputs[inputs.indexOf(input) + 1];
       if (nextInput instanceof HTMLInputElement) nextInput.focus();
     });
-    document.querySelectorAll('#worksheet-mode, #worksheet-level, #worksheet-family, #worksheet-band, #worksheet-style, #worksheet-orientation, #worksheet-count, #worksheet-flow-mode, #worksheet-submode, #worksheet-print-mode, #worksheet-op-min, #worksheet-op-max').forEach((node) => {
+    document.querySelectorAll('#worksheet-mode, #worksheet-band, #worksheet-style, #worksheet-orientation, #worksheet-count, #worksheet-flow-mode, #worksheet-submode, #worksheet-print-mode, #worksheet-op-min, #worksheet-op-max').forEach((node) => {
       node.addEventListener('change', renderSheet);
     });
     const initialPreset = new URLSearchParams(window.location.search).get('preset');
