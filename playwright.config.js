@@ -1,16 +1,27 @@
 import { defineConfig } from '@playwright/test';
 
+const configuredBaseURL = process.env.PLAYWRIGHT_BASE_URL || 'https://dmoliveira.github.io/soroban-dojo/';
+const baseURL = configuredBaseURL.endsWith('/') ? configuredBaseURL : `${configuredBaseURL}/`;
+
 export default defineConfig({
   testDir: './tests/e2e',
-  fullyParallel: true,
+  fullyParallel: false,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  reporter: process.env.CI ? 'list' : 'html',
   use: {
-    baseURL: 'http://127.0.0.1:4322',
+    baseURL,
     headless: true,
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
   },
-  webServer: {
-    command: 'ASTRO_DISABLE_DEV_TOOLBAR=1 npm run dev -- --host 127.0.0.1 --port 4322',
-    url: 'http://127.0.0.1:4322/ai-soroban/worksheets',
-    reuseExistingServer: true,
-    timeout: 120000,
-  },
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        browserName: 'chromium',
+      },
+    },
+  ],
 });
