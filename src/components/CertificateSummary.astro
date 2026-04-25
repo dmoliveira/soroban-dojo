@@ -17,17 +17,17 @@
   const levels = ['L0', 'L1', 'L2', 'L3', 'L4', 'L5'];
 
   if (!levels.some((level) => certificates[level])) {
-    const note = document.createElement('p');
-    note.className = 'muted';
-    note.textContent = 'No certificates earned yet. Clear one boss round to begin your certificate record.';
+    const note = document.createElement('div');
+    note.className = 'empty-state-card muted';
+    note.innerHTML = '<div class="empty-state-head"><span class="empty-state-mark">✦</span><strong>No certificates yet</strong></div><p>Clear one boss round to begin your certificate record.</p>';
     mount.appendChild(note);
   } else {
     levels.forEach((level) => {
       const entry = certificates[level];
       if (!entry) return;
       const card = document.createElement('article');
-      card.className = 'session-card';
-      card.innerHTML = `<strong>${level} certificate</strong><div class="meta-row"><span>${entry.name}</span><span>${entry.date}</span></div><p class="muted small">${entry.name} cleared the ${level} boss round.</p>`;
+      card.className = 'reward-state-card';
+      card.innerHTML = `<div class="reward-state-head"><span class="reward-state-mark">✓</span><strong>${level} certificate</strong></div><div class="meta-row"><span>${entry.name}</span><span>${entry.date}</span></div><p class="muted small">${entry.name} cleared the ${level} boss round.</p>`;
       mount.appendChild(card);
     });
   }
