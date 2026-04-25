@@ -5,7 +5,7 @@ test('lesson mini-checks and completion reveal exact next moves', async ({ page 
     localStorage.removeItem('soroban-dojo:completed-lessons');
   });
 
-  await page.goto('/ai-soroban/lessons/l4/first-multiplication-patterns');
+  await page.goto('lessons/l4/first-multiplication-patterns');
 
   await expect(page.locator('#lesson-complete-next')).toBeHidden();
 
@@ -22,7 +22,7 @@ test('lesson mini-checks and completion reveal exact next moves', async ({ page 
 });
 
 test('division lesson links into focused worksheet submodes', async ({ page }) => {
-  await page.goto('/ai-soroban/lessons/l4/first-division-patterns');
+  await page.goto('lessons/l4/first-division-patterns');
 
   await page.getByRole('link', { name: 'Quotient-building worksheet' }).click();
 
@@ -38,14 +38,14 @@ test('weekly study plan adapts to multiplication weakness', async ({ page }) => 
     }));
   });
 
-  await page.goto('/ai-soroban/study-plan');
+  await page.goto('study-plan');
 
   await expect(page.locator('#weekly-plan-title')).toContainText('Multiplication structure week');
   await expect(page.getByRole('link', { name: 'Open worksheet' }).last()).toHaveAttribute('href', /submode=place-shifts/);
 });
 
 test('weekly study plan steps can be marked done', async ({ page }) => {
-  await page.goto('/ai-soroban/study-plan');
+  await page.goto('study-plan');
 
   const firstToggle = page.locator('.weekly-plan-toggle').first();
   await firstToggle.click();
@@ -55,7 +55,7 @@ test('weekly study plan steps can be marked done', async ({ page }) => {
 });
 
 test('boss certificate preview updates after boss completion', async ({ page }) => {
-  await page.goto('/ai-soroban/boss-rounds');
+  await page.goto('boss-rounds');
 
   await page.locator('#certificate-name').fill('Diego');
   await page.locator('.boss-round-toggle').first().click();
@@ -65,7 +65,7 @@ test('boss certificate preview updates after boss completion', async ({ page }) 
 });
 
 test('boss certificate text can be copied after completion', async ({ page }) => {
-  await page.goto('/ai-soroban/boss-rounds');
+  await page.goto('boss-rounds');
 
   await page.locator('#certificate-name').fill('Diego');
   await page.locator('.boss-round-toggle').first().click();

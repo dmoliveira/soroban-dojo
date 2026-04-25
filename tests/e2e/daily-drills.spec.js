@@ -11,11 +11,11 @@ test('daily drills adapt to unfinished weekly plan step and weak area', async ({
       title: 'Division quotient week',
       lesson: { id: 'lesson-l4-006', done: true },
       exercise: { id: 'exercise-l4-007', done: false },
-      worksheet: { href: '/ai-soroban/worksheets?preset=division-focus&submode=quotient-building', done: false },
+      worksheet: { href: '/soroban-dojo/worksheets?preset=division-focus&submode=quotient-building', done: false },
     }));
   });
 
-  await page.goto('/ai-soroban/daily-drills');
+  await page.goto('daily-drills');
 
   await expect(page.locator('#daily-drill-focus')).toContainText('division');
   await expect(page.locator('#daily-drill-focus')).toContainText('exercise');

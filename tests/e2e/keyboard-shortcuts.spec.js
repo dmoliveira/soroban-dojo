@@ -32,7 +32,7 @@ const solveWorksheetPrompt = (prompt) => {
 };
 
 test('practice Enter verifies and advances on correct answer', async ({ page }) => {
-  await page.goto('/ai-soroban/practice');
+  await page.goto('practice');
 
   await page.getByText('Adjust session setup').click();
   await page.selectOption('#session-format', 'single');
@@ -52,7 +52,7 @@ test('practice Enter verifies and advances on correct answer', async ({ page }) 
 });
 
 test('practice fast start launches a warm-up session immediately', async ({ page }) => {
-  await page.goto('/ai-soroban/practice');
+  await page.goto('practice');
 
   await page.getByRole('button', { name: 'Start warm-up now' }).click();
 
@@ -61,7 +61,7 @@ test('practice fast start launches a warm-up session immediately', async ({ page
 });
 
 test('practice journey can launch multiplication and division training', async ({ page }) => {
-  await page.goto('/ai-soroban/practice');
+  await page.goto('practice');
 
   await page.getByRole('button', { name: 'Start now' }).nth(3).click();
 
@@ -71,7 +71,7 @@ test('practice journey can launch multiplication and division training', async (
 });
 
 test('practice challenge can launch anzan burst mode', async ({ page }) => {
-  await page.goto('/ai-soroban/practice');
+  await page.goto('practice');
 
   await page.getByRole('button', { name: 'Start now' }).last().click();
 
@@ -87,14 +87,14 @@ test('practice adaptive next move updates from weakness history', async ({ page 
     }));
   });
 
-  await page.goto('/ai-soroban/practice');
+  await page.goto('practice');
 
   await expect(page.locator('#adaptive-next-title')).toContainText('Division quotient-building');
   await expect(page.locator('#adaptive-next-worksheet')).toHaveAttribute('href', /submode=quotient-building/);
 });
 
 test('worksheet shortcuts clear, backspace, and advance after correct Enter', async ({ page }) => {
-  await page.goto('/ai-soroban/worksheets');
+  await page.goto('worksheets');
 
   const firstInput = page.locator('.worksheet-input').first();
   await firstInput.fill('123');
@@ -112,7 +112,7 @@ test('worksheet shortcuts clear, backspace, and advance after correct Enter', as
 });
 
 test('exercise shortcuts clear, backspace, and Enter verifies expected value', async ({ page }) => {
-  await page.goto('/ai-soroban/exercises/l1/add-two-and-three');
+  await page.goto('exercises/l1/add-two-and-three');
 
   const input = page.locator('#exercise-response');
   await input.fill('123');
