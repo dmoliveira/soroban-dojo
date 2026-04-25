@@ -4,15 +4,47 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 ---
 
 <BaseLayout title="Printable Soroban Worksheets | Soroban Dojo" description="Generate printable soroban worksheets by level, digit band, and skill pattern with student sheets, answer keys, and focused practice modes.">
-  <section class="panel content-prose no-print">
-    <p class="eyebrow">Soroban sheets · 印刷</p>
-    <h1>Ledger-style drill sheets</h1>
-    <p>Choose a fixed curriculum sheet or generate a denser practice ledger by level, operation family, and digit band. Blank responses are skipped; partial score uses only answered drills.</p>
+  <section class="worksheet-studio-shell">
+    <section class="worksheet-hero panel no-print" style={`--worksheet-mist:url('${base}graphics/worksheet-mist.svg')`}>
+      <div class="worksheet-hero-brand">
+        <div class="worksheet-hero-mark" aria-hidden="true">
+          <img src={`${base}graphics/sakura-mark.svg`} alt="" />
+        </div>
+        <div class="worksheet-hero-copy">
+          <p class="eyebrow">Today’s training · 印刷</p>
+          <h1>Professional drill studio</h1>
+          <p>Build premium soroban worksheets with calm control over level, digit band, family mix, and drill complexity — then print, coach, or solve in place.</p>
+        </div>
+      </div>
+      <div class="worksheet-hero-stats">
+        <article class="worksheet-hero-stat subtle-panel">
+          <span>Current setup</span>
+          <strong id="worksheet-current-setup-copy">L0 Foundations · Fixed sheet · Addition + subtraction · 1-digit band · Fixed op count · Ledger rows</strong>
+        </article>
+        <article class="worksheet-hero-stat subtle-panel">
+          <span>Band behavior</span>
+          <strong id="worksheet-band-summary">Each shown operand stays in the selected digit band.</strong>
+        </article>
+        <article class="worksheet-hero-stat subtle-panel">
+          <span>Focus target</span>
+          <strong id="worksheet-target-summary">Focus target: auto</strong>
+        </article>
+      </div>
+    </section>
 
-    <div class="worksheet-preset-row">
-      <button class="button button-secondary preset-button" data-preset="warmup">Warm-up</button>
-      <button class="button button-secondary preset-button" data-preset="practice">Practice</button>
-      <button class="button button-secondary preset-button" data-preset="review">Review</button>
+    <section class="worksheet-command-deck panel no-print">
+      <div class="worksheet-command-head">
+        <div>
+          <p class="eyebrow">Preset routes</p>
+          <h2>Choose a training route</h2>
+        </div>
+        <p class="muted">Use a preset to get moving quickly, then tune the worksheet details below.</p>
+      </div>
+
+      <div class="worksheet-preset-row">
+        <button class="button button-secondary preset-button" data-preset="warmup">Warm-up</button>
+        <button class="button button-secondary preset-button" data-preset="practice">Practice</button>
+        <button class="button button-secondary preset-button" data-preset="review">Review</button>
       <button class="button button-secondary preset-button" data-preset="speed">Speed</button>
       <button class="button button-secondary preset-button" data-preset="exam">Exam</button>
       <button class="button button-secondary preset-button" data-preset="foundations-focus">Foundations</button>
@@ -27,7 +59,7 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       <button class="button button-secondary preset-button" data-preset="sequence-mix">Sequence mix</button>
     </div>
 
-    <div class="ledger-controls worksheet-controls-shell">
+      <div class="ledger-controls worksheet-controls-shell">
       <div class="worksheet-controls-grid worksheet-controls-grid-main">
       <label class="stack-sm">
         <span>Sheet mode</span>
@@ -163,69 +195,28 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       </details>
     </div>
 
-    <div class="worksheet-toolbar-actions">
-      <div class="button-row worksheet-action-row worksheet-action-row-primary">
-        <button class="button" id="generate-worksheet">Generate ledger</button>
-        <button class="button button-secondary" id="check-worksheet">Check answered</button>
+      <div class="worksheet-toolbar-actions">
+        <div class="button-row worksheet-action-row worksheet-action-row-primary">
+          <button class="button" id="generate-worksheet">Generate ledger</button>
+          <button class="button button-secondary" id="check-worksheet">Check answered</button>
         <button class="button button-secondary" id="reveal-worksheet">Reveal answers</button>
       </div>
-      <div class="button-row worksheet-action-row worksheet-action-row-secondary">
-        <button class="button button-secondary" id="teacher-key">Teacher key</button>
-        <button class="button button-secondary" id="worksheet-timer-toggle">Start timer</button>
-        <button class="button button-secondary" id="print-worksheet">Print sheet</button>
-        <a class="button button-secondary" href={`${base}practice`}>Return to practice</a>
+        <div class="button-row worksheet-action-row worksheet-action-row-secondary">
+          <button class="button button-secondary" id="teacher-key">Teacher key</button>
+          <button class="button button-secondary" id="worksheet-timer-toggle">Start timer</button>
+          <button class="button button-secondary" id="print-worksheet">Print sheet</button>
+          <a class="button button-secondary" href={`${base}practice`}>Return to practice</a>
+        </div>
       </div>
-    </div>
-    <div class="worksheet-current-setup subtle-panel">
-      <strong>Current setup</strong>
-      <div id="worksheet-current-setup-copy" class="muted small">L0 Foundations · Fixed sheet · Addition + subtraction · 1-digit band · Fixed op count · Ledger rows</div>
-      <div id="worksheet-band-summary" class="muted small">Each shown operand stays in the selected digit band.</div>
-      <div id="worksheet-target-summary" class="muted small">Focus target: auto</div>
-    </div>
-    <div class="subtle-panel worksheet-focus-guide">
-      <strong id="worksheet-focus-title">Focus guide</strong>
-      <p id="worksheet-focus-copy" class="muted small">This sheet can adapt its drill style to the selected family or your recent weak areas.</p>
-      <p id="worksheet-focus-example" class="muted small">Example focus: balanced variety across the current sheet.</p>
-    </div>
-    <div class="subtle-panel worksheet-worked-example">
-      <strong id="worksheet-worked-title">Worked example</strong>
-      <p id="worksheet-worked-prompt" class="muted small">A representative drill will appear here so you know what this worksheet is training.</p>
-      <p id="worksheet-worked-method" class="muted small">Generate the sheet to see how the current focus is meant to feel.</p>
-    </div>
+    </section>
 
-    <div class="worksheet-scorebar subtle-panel" id="worksheet-scorebar">
-      <strong>Score</strong>
-      <span id="worksheet-score-copy" class="muted">No answers checked yet.</span>
-    </div>
-    <div id="worksheet-celebration" class="worksheet-celebration" hidden>
-      <strong>Congratulations</strong>
-      <span>You completed the full sheet with perfect accuracy.</span>
-    </div>
-    <div class="worksheet-score-grid">
-      <article class="stat-card stat-card-soft"><span id="worksheet-answered">0</span><small>Answered</small></article>
-      <article class="stat-card stat-card-soft"><span id="worksheet-correct">0</span><small>Correct</small></article>
-      <article class="stat-card stat-card-soft"><span id="worksheet-accuracy">0%</span><small>Accuracy</small></article>
-      <article class="stat-card stat-card-soft"><span id="worksheet-completion">0%</span><small>Completion</small></article>
-      <article class="stat-card stat-card-soft"><span id="worksheet-time">0s</span><small>Time</small></article>
-    </div>
-    <div class="worksheet-note-strip">
-      <div id="adaptive-note" class="subtle-panel worksheet-note-panel no-print" hidden>
-        <strong>Adaptive recommendation</strong>
-        <p id="adaptive-note-copy" class="muted">This sheet is tuned to your recent weak areas stored in local progress.</p>
-      </div>
-      <div id="teacher-note" class="subtle-panel worksheet-note-panel no-print" hidden>
-        <strong>Teacher view</strong>
-        <p class="muted">Use this mode to print answer keys or review drills aloud. Answers remain visible while blank student rows are left untouched.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="worksheet-board">
-    <article class="panel worksheet-panel ledger-panel">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Drill ledger</p>
-          <h2 id="worksheet-title">Standard Soroban drill set</h2>
+    <section class="worksheet-main-grid">
+      <section class="worksheet-board-shell">
+        <article class="panel worksheet-panel ledger-panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Drill ledger</p>
+            <h2 id="worksheet-title">Standard Soroban drill set</h2>
         </div>
         <span class="badge" id="worksheet-count-badge">40 drills</span>
       </div>
@@ -235,12 +226,287 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
         <span>Response</span>
         <span>Result</span>
         <span>Actions</span>
-      </div>
-      <div id="worksheet-table" class="worksheet-table ledger-table"></div>
-    </article>
+        </div>
+        <div id="worksheet-table" class="worksheet-table ledger-table"></div>
+        </article>
+      </section>
+
+      <aside class="worksheet-insight-rail no-print">
+        <div class="worksheet-progress-card subtle-panel">
+          <p class="eyebrow">Session progress</p>
+          <div class="worksheet-progress-ring">
+            <div class="worksheet-progress-ring-inner">
+              <strong id="worksheet-completion">0%</strong>
+              <span>completed</span>
+            </div>
+          </div>
+          <div class="worksheet-scorebar subtle-panel" id="worksheet-scorebar">
+            <strong>Score</strong>
+            <span id="worksheet-score-copy" class="muted">No answers checked yet.</span>
+          </div>
+          <div id="worksheet-celebration" class="worksheet-celebration" hidden>
+            <strong>Congratulations</strong>
+            <span>You completed the full sheet with perfect accuracy.</span>
+          </div>
+        </div>
+
+        <div class="worksheet-score-grid">
+          <article class="stat-card stat-card-soft"><span id="worksheet-answered">0</span><small>Answered</small></article>
+          <article class="stat-card stat-card-soft"><span id="worksheet-correct">0</span><small>Correct</small></article>
+          <article class="stat-card stat-card-soft"><span id="worksheet-accuracy">0%</span><small>Accuracy</small></article>
+          <article class="stat-card stat-card-soft"><span id="worksheet-time">0s</span><small>Time</small></article>
+        </div>
+
+        <div class="worksheet-current-setup subtle-panel">
+          <strong>Current setup</strong>
+          <div class="muted small">Mirror of the active worksheet configuration and focus.</div>
+          <div class="muted small">Use the summary cards above to scan the current setup quickly.</div>
+        </div>
+
+        <div class="subtle-panel worksheet-focus-guide">
+          <strong id="worksheet-focus-title">Focus guide</strong>
+          <p id="worksheet-focus-copy" class="muted small">This sheet can adapt its drill style to the selected family or your recent weak areas.</p>
+          <p id="worksheet-focus-example" class="muted small">Example focus: balanced variety across the current sheet.</p>
+        </div>
+
+        <div class="subtle-panel worksheet-worked-example">
+          <strong id="worksheet-worked-title">Worked example</strong>
+          <p id="worksheet-worked-prompt" class="muted small">A representative drill will appear here so you know what this worksheet is training.</p>
+          <p id="worksheet-worked-method" class="muted small">Generate the sheet to see how the current focus is meant to feel.</p>
+        </div>
+
+        <div class="worksheet-note-strip">
+          <div id="adaptive-note" class="subtle-panel worksheet-note-panel no-print" hidden>
+            <strong>Adaptive recommendation</strong>
+            <p id="adaptive-note-copy" class="muted">This sheet is tuned to your recent weak areas stored in local progress.</p>
+          </div>
+          <div id="teacher-note" class="subtle-panel worksheet-note-panel no-print" hidden>
+            <strong>Teacher view</strong>
+            <p class="muted">Use this mode to print answer keys or review drills aloud. Answers remain visible while blank student rows are left untouched.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
   </section>
 
   <style>
+    .worksheet-studio-shell {
+      display: grid;
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .worksheet-hero,
+    .worksheet-command-deck,
+    .worksheet-panel,
+    .worksheet-insight-rail > .subtle-panel,
+    .worksheet-progress-card,
+    .worksheet-score-grid .stat-card {
+      border: 1px solid rgba(244, 194, 194, 0.55);
+      box-shadow: 0 18px 48px rgba(201, 114, 114, 0.08);
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,251,249,0.96));
+    }
+
+    .worksheet-hero {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      overflow: hidden;
+      position: relative;
+      background-image: linear-gradient(135deg, rgba(255,250,248,0.95), rgba(255,244,246,0.98)), var(--worksheet-mist);
+      background-size: cover;
+      background-position: center bottom;
+    }
+
+    .worksheet-hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -2rem -2rem auto;
+      width: 14rem;
+      height: 14rem;
+      background: radial-gradient(circle, rgba(255,182,199,0.18), rgba(255,182,199,0));
+      pointer-events: none;
+    }
+
+    .worksheet-hero-brand {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      position: relative;
+      z-index: 1;
+    }
+
+    .worksheet-hero-mark {
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 1.5rem;
+      background: rgba(255,255,255,0.8);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 32px rgba(201, 114, 114, 0.12);
+      flex: 0 0 auto;
+    }
+
+    .worksheet-hero-mark img {
+      width: 3.25rem;
+      height: 3.25rem;
+    }
+
+    .worksheet-hero-copy h1 {
+      margin-bottom: 0.5rem;
+    }
+
+    .worksheet-hero-copy p:last-child {
+      margin-bottom: 0;
+      max-width: 42rem;
+    }
+
+    .worksheet-hero-stats {
+      display: grid;
+      gap: 0.85rem;
+      align-content: start;
+      position: relative;
+      z-index: 1;
+    }
+
+    .worksheet-hero-stat {
+      display: grid;
+      gap: 0.35rem;
+      padding: 1rem 1.1rem;
+    }
+
+    .worksheet-hero-stat span {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #9a6c6c;
+    }
+
+    .worksheet-hero-stat strong {
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .worksheet-command-deck {
+      display: grid;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .worksheet-command-head {
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      justify-content: space-between;
+    }
+
+    .worksheet-command-head p:last-child {
+      max-width: 34rem;
+      margin: 0;
+    }
+
+    .worksheet-main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 23rem;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    .worksheet-board-shell {
+      min-width: 0;
+    }
+
+    .worksheet-insight-rail {
+      display: grid;
+      gap: 1rem;
+      position: sticky;
+      top: 1rem;
+      align-self: start;
+    }
+
+    .worksheet-progress-card {
+      display: grid;
+      gap: 1rem;
+      padding: 1.1rem;
+    }
+
+    .worksheet-progress-ring {
+      width: 12rem;
+      height: 12rem;
+      margin: 0 auto;
+      border-radius: 999px;
+      background: conic-gradient(#f06283 0deg, #f06283 180deg, #f6e7df 180deg 360deg);
+      display: grid;
+      place-items: center;
+    }
+
+    .worksheet-progress-ring-inner {
+      width: 8.5rem;
+      height: 8.5rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.97);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      gap: 0.2rem;
+      box-shadow: inset 0 0 0 1px rgba(244, 194, 194, 0.4);
+    }
+
+    .worksheet-progress-ring-inner strong {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .worksheet-progress-ring-inner span {
+      color: #8b6b6b;
+      font-size: 0.85rem;
+    }
+
+    .worksheet-score-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .worksheet-score-grid .stat-card {
+      padding: 1rem;
+      border-radius: 1rem;
+    }
+
+    .worksheet-score-grid .stat-card span {
+      font-size: 1.5rem;
+    }
+
+    .worksheet-note-strip,
+    .worksheet-focus-guide,
+    .worksheet-worked-example,
+    .worksheet-current-setup {
+      margin-top: 0;
+    }
+
+    .worksheet-current-setup strong,
+    .worksheet-focus-guide strong,
+    .worksheet-worked-example strong {
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .worksheet-panel {
+      overflow: hidden;
+    }
+
+    .worksheet-panel .section-head {
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .worksheet-panel .badge {
+      background: rgba(240, 98, 131, 0.08);
+      color: #d94f73;
+      border-color: rgba(240, 98, 131, 0.25);
+    }
+
     .worksheet-controls-shell {
       display: grid;
       gap: 1rem;
@@ -314,6 +580,17 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
+    }
+
+    @media (max-width: 1100px) {
+      .worksheet-hero,
+      .worksheet-main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .worksheet-insight-rail {
+        position: static;
+      }
     }
   </style>
 
